@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Modèle de données d'un projet K-Gantt (fichier .kgantt.json).
 
 import { defaultCalendar, normalizeCalendar, WHERE } from './calendar.js';

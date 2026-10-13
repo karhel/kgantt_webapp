@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Utilitaires de dates : tout est calculé en "numéros de jour" UTC (entiers)
 // et en "créneaux" (2 créneaux par jour : 0 = matin, 1 = après-midi).
 

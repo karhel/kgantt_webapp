@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // État de l'application : projet courant, annuler / rétablir, brouillon local.
 // Aucune donnée n'est envoyée au serveur : le brouillon reste dans le navigateur.
 

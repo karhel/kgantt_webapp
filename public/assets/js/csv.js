@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Export CSV compatible Excel (français) : séparateur « ; », BOM UTF-8, fins de ligne CRLF.
 
 import { flatten } from './project.js';

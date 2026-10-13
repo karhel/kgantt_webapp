@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
 /* K-Gantt — feuille de style.
    L'identité visuelle est concentrée dans les variables ci-dessous (--brand…). */
 
@@ -495,3 +496,26 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: pop .14s 
   .legend { display: none; }
   .cal-layout { grid-template-columns: 1fr; }
 }
+
+/* --- Pages de contenu (mentions légales) ---------------------------------- */
+
+body.page { display: block; overflow: auto; height: auto; min-height: 100%; }
+.legal { max-width: 820px; margin: 0 auto; padding: 32px 20px 64px; }
+.legal h1 { font-size: 26px; letter-spacing: -.01em; color: var(--text-strong); margin: 28px 0 6px; }
+.legal h1:first-child { margin-top: 8px; }
+.legal h2 { font-size: 16px; color: var(--text-strong); margin: 0 0 8px; }
+.legal section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 22px; margin: 14px 0; box-shadow: var(--shadow-sm);
+}
+.legal p, .legal li { line-height: 1.6; margin: 0 0 8px; }
+.legal p:last-child { margin-bottom: 0; }
+.legal ul { margin: 0 0 8px; padding-left: 20px; }
+.legal .lead { color: var(--muted); margin: 0 0 8px; }
+.legal code { font-size: 12.5px; background: var(--surface-3); padding: 1px 5px; border-radius: 4px; }
+.legal-warning { background: color-mix(in srgb, var(--warning) 15%, transparent); border: 1px solid var(--warning); padding: 10px 14px; border-radius: var(--radius-sm); }
+
+/* Liens de bas de page (licence, mentions légales) */
+.sb-links { display: inline-flex; gap: 12px; }
+.sb-links a { color: var(--muted); text-decoration: none; }
+.sb-links a:hover { color: var(--brand); text-decoration: underline; }

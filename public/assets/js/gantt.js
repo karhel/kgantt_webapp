@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Rendu SVG du diagramme (en-tête de la frise + corps). Le même code sert
 // à l'affichage à l'écran et aux exports PNG / PDF.
 

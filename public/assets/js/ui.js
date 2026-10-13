@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Petits utilitaires d'interface : fenêtres modales, confirmations, notifications.
 
 import { icon, hydrateIcons } from './icons.js';

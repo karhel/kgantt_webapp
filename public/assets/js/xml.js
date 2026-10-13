@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Lecteur XML minimal (éléments, attributs, texte, CDATA), utilisable dans le
 // navigateur comme dans Node. Suffisant pour les fichiers GanttProject (.gan).
 

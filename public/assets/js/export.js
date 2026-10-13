@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Exports : JSON (fichier projet), CSV, PNG et PDF.
 
 import { flatten } from './project.js';

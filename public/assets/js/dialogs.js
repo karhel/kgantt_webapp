@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Fenêtres : tâche, projet, ressources, nouveau projet, export, aide.
 
 import { store } from './store.js';
@@ -361,7 +362,7 @@ export function openExportDialog(kind, onExport) {
 
 // --- Aide ----------------------------------------------------------------------------
 
-export function openHelpDialog(version) {
+export function openHelpDialog({ version, sourceUrl, contact, legalUrl }) {
   openModal({
     title: 'Aide — K-Gantt',
     wide: true,
@@ -403,6 +404,8 @@ export function openHelpDialog(version) {
         <h3 style="margin-top:14px">GanttProject et agendas</h3>
         <p><b>Fichier → Importer depuis GanttProject</b> reprend un projet .gan existant. <b>Exporter → Agenda iCal</b> ajoute les tâches à Google Agenda, Outlook ou Apple Calendrier, une fois ou par abonnement (mise à jour automatique).</p>
         <p>Rien n’est envoyé sur le serveur. Votre travail est enregistré dans un <b>fichier .json</b> que vous gardez (Fichier → Enregistrer). Un brouillon est aussi conservé dans ce navigateur en cas de fermeture accidentelle.</p>
+        <h3 style="margin-top:14px">Logiciel libre</h3>
+        <p>K-Gantt est un logiciel libre sous licence <b>AGPL-3.0</b> : <a href="${esc(sourceUrl)}" target="_blank" rel="noopener">code source</a> · <a href="${esc(legalUrl)}" target="_blank">mentions légales et confidentialité</a> · contact : <a href="mailto:${esc(contact)}">${esc(contact)}</a></p>
         <p class="muted" style="margin-top:10px">K-Gantt version ${esc(version)}</p>
       </div></div>`,
     foot: '<span class="spacer"></span><button class="btn btn-primary" type="button" data-close="ok">Compris</button>',

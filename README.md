@@ -1,10 +1,13 @@
 # K-Gantt
 
+[![Licence : AGPL v3](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](LICENSE)
+[![Tests](https://github.com/karhel/kgantt_webapp/actions/workflows/tests.yml/badge.svg)](https://github.com/karhel/kgantt_webapp/actions/workflows/tests.yml)
+
 **Diagrammes de Gantt simples et intuitifs pour les projets étudiants, pensés pour l'alternance.**
 
 K-Gantt est une application web (PHP / HTML / JavaScript) qui permet aux étudiants de planifier leurs projets de classe en tenant compte de leur **rythme réel** : jours à l'école, jours en entreprise, vacances, stages. Les durées sont saisies en **jours de présence** et les dates sont calculées automatiquement.
 
-Adresse de production : **https://kgantt.phoen-ix.net**
+Adresse de production : **https://kgantt.phoen-ix.net**. K-Gantt est un **logiciel libre** : vous pouvez l'utiliser, l'étudier, le modifier et l'héberger pour votre établissement.
 
 ---
 
@@ -85,14 +88,18 @@ L'application n'a besoin que de **PHP ≥ 8.0** (avec cURL pour l'abonnement iCa
    ```
    public/
    ├── index.php              ← page de l'application
+   ├── mentions-legales.php   ← mentions légales et confidentialité
    ├── ical.php               ← abonnement iCal (lit un .kgantt.json public, ne stocke rien)
-   ├── inc/                   ← bibliothèque PHP (non accessible depuis le web)
+   ├── inc/                   ← configuration de l'instance et bibliothèque PHP (non accessibles depuis le web)
    ├── .htaccess              ← HTTPS, en-têtes de sécurité, cache
    ├── assets/                ← CSS, JavaScript, jsPDF, icônes
    ├── modeles/calendriers/   ← modèles de calendrier proposés aux étudiants
    └── exemples/              ← projet d'exemple
    ```
-4. Ouvrez https://kgantt.phoen-ix.net.
+4. Renseignez les informations de l'instance dans **`public/inc/config.php`** : nom de l'éditeur, contact, hébergeur, lien vers le code source. Elles alimentent la page `mentions-legales.php` et les liens de l'application.
+5. Ouvrez https://kgantt.phoen-ix.net.
+
+> **Héberger votre propre instance** : la licence AGPL impose de laisser vos utilisateurs accéder au code source de la version que vous exécutez. Si vous modifiez K-Gantt, publiez vos modifications et faites pointer `source_url` (dans `inc/config.php`) vers ce code. Le lien « Code source » de l'application l'affiche automatiquement.
 
 Pour **ajouter un modèle de calendrier** pour une classe :
 1. réglez le calendrier dans l'application ;
@@ -172,6 +179,18 @@ Une demi-journée s'écrit `AAAA-MM-JJ` pour le matin et `AAAA-MM-JJ:pm` pour l'
 
 Voir [docs/PLAN.md](docs/PLAN.md).
 
+## Contribuer
+
+Les contributions sont les bienvenues : signalements, idées, documentation, code. Lisez [CONTRIBUTING.md](CONTRIBUTING.md) et le [code de conduite](CODE_OF_CONDUCT.md). Pour une faille de sécurité, voir [SECURITY.md](SECURITY.md). Les évolutions sont listées dans [CHANGELOG.md](CHANGELOG.md).
+
+Contact : **kgantt@phoen-ix.net**
+
 ## Licence
 
-À définir par l'auteur. jsPDF est distribué sous licence MIT (`public/assets/vendor/jspdf.LICENSE.txt`).
+Copyright © 2026 karhel et les contributeurs de K-Gantt.
+
+K-Gantt est distribué sous licence **GNU Affero General Public License v3.0 ou ultérieure** (AGPL-3.0-or-later). Le texte complet est dans [LICENSE](LICENSE).
+
+En résumé : vous pouvez utiliser, modifier et redistribuer K-Gantt, y compris dans un cadre commercial. Toute version modifiée doit rester sous la même licence, et **si vous la proposez en ligne, vous devez en fournir le code source à ses utilisateurs**.
+
+Composant tiers : [jsPDF](https://github.com/parallax/jsPDF) 2.5.1, licence MIT (`public/assets/vendor/jspdf.LICENSE.txt`).

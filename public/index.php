@@ -1,10 +1,13 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * K-Gantt — page unique de l'application.
  * Aucune donnée n'est stockée côté serveur : PHP sert uniquement la page
  * et la liste des modèles de calendrier déposés dans /modeles/calendriers.
  */
 declare(strict_types=1);
+
+require __DIR__ . '/inc/config.php';
 
 const KGANTT_VERSION = '1.0.0';
 
@@ -142,6 +145,9 @@ header('Content-Type: text/html; charset=utf-8');
       'version' => KGANTT_VERSION,
       'models' => kgantt_models(),
       'example' => 'exemples/projet-exemple.kgantt.json',
+      'sourceUrl' => kgantt_config()['source_url'],
+      'contact' => kgantt_config()['contact'],
+      'legalUrl' => 'mentions-legales.php',
   ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
   <script src="<?= $asset('assets/vendor/jspdf.umd.min.js') ?>" defer></script>
   <script type="module" src="<?= $asset('assets/js/app.js') ?>"></script>

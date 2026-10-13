@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Génère les modèles de calendrier fournis et le projet d'exemple.
 // Usage : node tools/generer-modeles.mjs
 import { writeFileSync } from 'node:fs';

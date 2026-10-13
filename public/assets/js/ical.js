@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Agenda iCalendar (RFC 5545) : export .ics et données pour l'abonnement (ical.php).
 //
 // Les dates calculées sont aussi enregistrées dans le fichier .kgantt.json

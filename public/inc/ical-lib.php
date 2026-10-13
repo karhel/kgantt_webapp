@@ -1,4 +1,5 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * K-Gantt — génération iCalendar côté serveur (abonnement).
  * Miroir de assets/js/ical.js : lit un projet .kgantt.json contenant la section

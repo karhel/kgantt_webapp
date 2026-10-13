@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // K-Gantt — point d'entrée de l'application.
 
 import { store } from './store.js';
@@ -179,6 +180,7 @@ function renderStatus() {
   const late = [...s.items.values()].filter((i) => !i.summary && i.status === 'late').length;
   const leaves = [...s.items.values()].filter((i) => !i.summary).length;
   const hasBase = !!store.project.baseline && store.project.view.showBaseline !== false;
+  const links = `<span class="sb-links"><a href="${esc(config.legalUrl)}" target="_blank">Mentions légales</a><a href="${esc(config.sourceUrl)}" target="_blank" rel="noopener" title="K-Gantt est un logiciel libre (AGPL-3.0)">Code source</a></span>`;
   document.getElementById('statusbar').innerHTML = tasks.length ? `
     <span class="sb-progress">Avancement <span class="meter" title="Réalisé ${s.progress} % — attendu aujourd’hui ${s.expected} %"><i style="width:${s.progress}%"></i><em style="left:calc(${s.expected}% - 1px)"></em></span>
       <b>${s.progress} %</b><span>attendu ${s.expected} %</span></span>
@@ -187,7 +189,7 @@ function renderStatus() {
     <span class="legend">
       <span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span>
       <span><i class="sw sw-today"></i>Aujourd’hui</span>${hasBase ? '<span><i class="sw sw-baseline"></i>Prévu</span>' : ''}
-    </span>` : '<span>Aucune tâche pour le moment.</span><span class="legend"><span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span></span>';
+    </span>${links}` : `<span>Aucune tâche pour le moment.</span><span class="legend"><span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span></span>${links}`;
 }
 
 function captureFocus() {
@@ -329,7 +331,7 @@ const actions = {
   'export-png': () => openExportDialog('png', (o) => exportPNG(store.project, store.schedule, o)),
   'export-pdf': () => openExportDialog('pdf', (o) => exportPDF(store.project, store.schedule, o)),
   theme: () => toggleTheme(),
-  help: () => openHelpDialog(config.version),
+  help: () => openHelpDialog(config),
   project: () => openProjectDialog(),
 };
 

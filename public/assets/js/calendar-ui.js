@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Fenêtre « Calendrier » : rythme école / entreprise, alternance, vacances, modèles partageables.
 
 import { normalizeCalendar, createResolver, makeCycle, countDays, TYPE_LABELS, SCHOOL, COMPANY, OFF } from './calendar.js';

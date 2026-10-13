@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Faille de sécurité
+    url: https://github.com/karhel/kgantt_webapp/blob/main/SECURITY.md
+    about: Ne la signalez pas publiquement ; écrivez à kgantt@phoen-ix.net.
+  - name: ✉️ Contact
+    url: mailto:kgantt@phoen-ix.net
+    about: Pour toute autre question.

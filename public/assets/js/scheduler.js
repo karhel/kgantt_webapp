@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Planification : calcule les dates réelles de chaque tâche à partir
 // des durées (en jours de présence), du lieu, des dépendances et du calendrier.
 

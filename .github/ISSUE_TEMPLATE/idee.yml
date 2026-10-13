@@ -1,0 +1,15 @@
+name: 💡 Idée
+description: Proposer une amélioration ou une nouvelle fonctionnalité
+labels: [amélioration]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Quel besoin ?
+      description: Décrivez la situation (élève, enseignant, type de projet…) et ce qui manque aujourd'hui.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Solution envisagée

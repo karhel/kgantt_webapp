@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Tests : import GanttProject, génération iCal (JS) et parité avec ical.php (PHP).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

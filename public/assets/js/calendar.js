@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Calendrier de rythme (école / entreprise / libre) à la demi-journée.
 //
 // Résolution du type d'une demi-journée, de la plus faible à la plus forte priorité :

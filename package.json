@@ -3,6 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "description": "K-Gantt : diagrammes de Gantt pour projets étudiants en alternance",
+  "license": "AGPL-3.0-or-later",
+  "author": "karhel",
+  "homepage": "https://kgantt.phoen-ix.net",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karhel/kgantt_webapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/karhel/kgantt_webapp/issues",
+    "email": "kgantt@phoen-ix.net"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",

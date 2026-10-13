@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Tests du moteur K-Gantt (sans navigateur) : node --test tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
