@@ -59,7 +59,7 @@ export function openTaskDialog(taskId) {
         <div class="info-box">
           <span>Début : <b>${slotLabel(it.start, half)}</b></span>
           <span>Fin : <b>${slotLabel(it.milestone ? it.start : it.end, half)}</b></span>
-          ${!it.milestone ? `<span>Durée : <b>${num(it.n / 2)} j</b></span>` : ''}
+          ${!it.milestone ? `<span>Durée : <b>${num(it.summary ? it.span : it.n / 2)} j</b></span>` : ''}
           <span>État : <b>${STATUS_LABELS[it.status]}</b> (attendu aujourd’hui : ${it.expected} %)</span>
           ${base ? `<span>Prévu : <b>${slotLabel(parseSlot(base.start), half)} → ${slotLabel(parseSlot(base.end), half)}</b></span>` : ''}
           ${it.error ? `<span class="g-err">⚠ ${esc(it.error)}</span>` : ''}

@@ -26,8 +26,8 @@ const emptyEl = document.getElementById('empty');
 let selectedId = null;
 let layout = null;
 let scrollToStart = true;
-let tableW = 700;
-try { tableW = Math.max(280, Math.min(1000, +localStorage.getItem('kgantt:tableW') || 700)); } catch { /* */ }
+let tableW = 740;
+try { tableW = Math.max(280, Math.min(1000, +localStorage.getItem('kgantt:tableW') || 740)); } catch { /* */ }
 
 // Styles du SVG (partagés avec l'export).
 document.head.insertAdjacentHTML('beforeend', `<style>${SVG_CSS}</style>`);
@@ -86,7 +86,7 @@ function rowHTML(row, sched, half) {
     : '<span class="g-toggle-spacer"></span>';
   const ms = it.milestone && !summary ? `<span class="g-ms">${icon('diamond', 13)}</span>` : '';
   const step = half ? 0.5 : 1;
-  const dur = summary ? `<span class="g-ro" style="display:block">${String(it.n / 2).replace('.', ',')} j</span>`
+  const dur = summary ? `<span class="g-ro" style="display:block">${String(it.span).replace('.', ',')} j</span>`
     : it.milestone ? '<span class="g-ro" style="display:block">—</span>'
       : `<input type="number" data-f="duration" min="${step}" step="${step}" value="${t.duration}" title="Durée en jours de présence">`;
   const where = summary || it.milestone ? ''
@@ -302,7 +302,7 @@ const actions = {
       const tasks = {};
       for (const t of p.tasks) {
         const it = s.items.get(t.id);
-        tasks[t.id] = { start: formatSlot(it.start), end: formatSlot(it.milestone ? it.start : it.end), milestone: it.milestone };
+        tasks[t.id] = { start: formatSlot(it.start), end: formatSlot(it.milestone ? it.start : it.end), milestone: it.milestone, atEnd: !!it.atEnd };
       }
       p.baseline = { date: toISO(today()), tasks };
       p.view.showBaseline = true;
@@ -634,7 +634,8 @@ ganttEl.addEventListener('pointerdown', (e) => {
     svg.appendChild(rect);
     drag = { kind: 'resize', id, svg, rect, it, duration: null };
   } else if (role === 'bar') {
-    drag = { kind: 'move', id, svg, g, it, x0: p.x, moved: false, slot: it.start };
+    const origin = it.milestone && it.atEnd ? it.start + 1 : it.start;
+    drag = { kind: 'move', id, svg, g, it, origin, x0: p.x, moved: false, slot: origin };
   } else return;
   svg.setPointerCapture(e.pointerId);
 });
@@ -650,9 +651,9 @@ ganttEl.addEventListener('pointermove', (e) => {
     if (!drag.moved && Math.abs(dx) < 4) return;
     drag.moved = true;
     drag.svg.classList.add('is-dragging');
-    const slot = snap(drag.it.start + Math.round(dx / (layout.dayW / 2)));
+    const slot = snap(drag.origin + Math.round(dx / (layout.dayW / 2)));
     drag.slot = slot;
-    drag.g.setAttribute('transform', `translate(${layout.x(slot) - layout.x(drag.it.start)} 0)`);
+    drag.g.setAttribute('transform', `translate(${layout.x(slot) - layout.x(drag.origin)} 0)`);
     showTip(`Début souhaité : ${slotLabelShort(slot)}`, e.clientX, e.clientY);
   } else if (drag.kind === 'resize') {
     const t = store.project.tasks.find((x) => x.id === drag.id);
@@ -686,7 +687,8 @@ ganttEl.addEventListener('pointerup', () => {
     if (!d.moved) return;
     const slot = d.slot;
     store.update((p) => { const t = p.tasks.find((x) => x.id === d.id); t.notBefore = formatSlot(slot); });
-    const start = store.schedule.items.get(d.id)?.start;
+    const it = store.schedule.items.get(d.id);
+    const start = it && (it.milestone && it.atEnd ? it.start + 1 : it.start);
     if (start != null && start !== slot) {
       toast(`Début ajusté au ${slotLabelShort(start)} : premier créneau possible (calendrier ou tâches à attendre).`);
     }

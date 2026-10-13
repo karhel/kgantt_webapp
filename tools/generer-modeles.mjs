@@ -88,7 +88,7 @@ const s0 = schedule(initial);
 p.baseline = { date: '2026-09-07', tasks: {} };
 for (const t of initial.tasks) {
   const it = s0.items.get(t.id);
-  p.baseline.tasks[t.id] = { start: formatSlot(it.start), end: formatSlot(it.milestone ? it.start : it.end), milestone: it.milestone };
+  p.baseline.tasks[t.id] = { start: formatSlot(it.start), end: formatSlot(it.milestone ? it.start : it.end), milestone: it.milestone, atEnd: !!it.atEnd };
 }
 p.view = { zoom: 'week', showBaseline: true };
 // Dates calculées : permettent l'abonnement iCal directement sur ce fichier.

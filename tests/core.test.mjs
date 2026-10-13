@@ -87,7 +87,8 @@ test('planification : durées en jours de présence et dépendances', () => {
 
   const C = s.items.get('c');
   assert.ok(C.milestone);
-  assert.equal(slotISO(C.start), '2026-09-17');
+  assert.equal(slotISO(C.start), '2026-09-16:pm'); // jalon à la fin de son prédécesseur
+  assert.ok(C.atEnd);
 
   const E = s.items.get('e');
   assert.equal(slotISO(E.start), '2026-09-09'); // premier mercredi
@@ -178,4 +179,40 @@ test('export CSV : séparateur ; et échappement', () => {
   const lines = csv.replace(/^﻿/, '').split('\r\n');
   assert.match(lines[0], /^N°;Nom;/);
   assert.match(lines[1], /^1;"Analyse; ""besoin""";Tâche;1;École;07\/09\/2026;07\/09\/2026;0;;Léa;/);
+});
+
+test('conventions Gantt : jalon daté de la fin de son prédécesseur, jamais un samedi', () => {
+  const p = defaultProject();
+  p.project.start = '2026-09-07';
+  p.tasks.push(
+    newTask({ id: 'a', duration: 5 }), // lundi → vendredi
+    newTask({ id: 'm', type: 'milestone', duration: 0, deps: ['a'] }),
+    newTask({ id: 'b', duration: 1, deps: ['m'] }),
+    newTask({ id: 'libre', type: 'milestone', duration: 0, notBefore: '2026-09-09' }),
+  );
+  const s = schedule(p, { today: d('2026-09-01') });
+  assert.equal(slotISO(s.items.get('m').start), '2026-09-11:pm'); // vendredi
+  assert.equal(slotISO(s.items.get('b').start), '2026-09-14'); // le successeur démarre lundi
+  assert.equal(slotISO(s.items.get('libre').start), '2026-09-09'); // jalon sans prédécesseur : à sa date
+  assert.equal(s.items.get('libre').atEnd, false);
+  // Attendu : à 100 % seulement une fois la date passée
+  assert.equal(schedule(p, { today: d('2026-09-11') }).items.get('m').expected, 0);
+  assert.equal(schedule(p, { today: d('2026-09-12') }).items.get('m').expected, 100);
+});
+
+test('conventions Gantt : durée d’un groupe = étendue en jours travaillés', () => {
+  const p = defaultProject();
+  p.project.start = '2026-09-07';
+  p.tasks.push(
+    newTask({ id: 'g' }),
+    newTask({ id: 'g1', parent: 'g', duration: 3 }),
+    newTask({ id: 'g2', parent: 'g', duration: 3 }), // en parallèle
+    newTask({ id: 'h' }),
+    newTask({ id: 'h1', parent: 'h', duration: 4 }),
+    newTask({ id: 'h2', parent: 'h', duration: 2, deps: ['h1'] }), // traverse un week-end
+  );
+  const s = schedule(p, { today: d('2026-09-01') });
+  assert.equal(s.items.get('g').span, 3);
+  assert.equal(s.items.get('h').span, 6);
+  assert.equal(s.items.get('g').n, 12); // le travail total (pondération de l'avancement) reste 6 j
 });

@@ -1,8 +1,8 @@
 // Planification : calcule les dates réelles de chaque tâche à partir
 // des durées (en jours de présence), du lieu, des dépendances et du calendrier.
 
-import { createResolver, WHERE } from './calendar.js';
-import { toDay, parseSlot, slotOf, today as todayDay } from './dates.js';
+import { createResolver, WHERE, OFF } from './calendar.js';
+import { toDay, parseSlot, slotOf, dayOfSlot, today as todayDay } from './dates.js';
 
 const MAX_SEARCH_SLOTS = 2 * 366 * 6; // on cherche au plus 6 ans de créneaux
 
@@ -52,10 +52,12 @@ export function schedule(project, { today = todayDay() } = {}) {
     return s;
   }
 
-  // Dernier créneau occupé ; pour un jalon, le créneau qui le précède.
+  // Dernier créneau occupé. Un jalon est un instant : à la fin de son créneau (atEnd)
+  // ou au début de celui-ci.
   function finish(t) {
     const it = compute(t);
-    return it.milestone ? it.start - 1 : it.end;
+    if (!it.milestone) return it.end;
+    return it.atEnd ? it.start : it.start - 1;
   }
 
   function compute(t) {
@@ -75,9 +77,20 @@ export function schedule(project, { today = todayDay() } = {}) {
       const parts = sub.map(compute);
       const start = Math.min(...parts.map((p) => p.start));
       const end = Math.max(...parts.map((p) => p.end));
-      item = { start, end, n: parts.reduce((a, p) => a + p.n, 0), runs: [], summary: true, milestone: false };
+      const n = parts.reduce((a, p) => a + p.n, 0);
+      // Durée d'un groupe = étendue en jours travaillés (école ou entreprise) entre son début et sa fin,
+      // et non la somme des sous-tâches (qui peuvent se dérouler en parallèle).
+      let span = 0;
+      if (n > 0) for (let sl = start; sl <= end; sl++) if (resolver.slotType(sl) !== OFF) span++;
+      item = { start, end, n, span: span / 2, runs: [], summary: true, milestone: false };
     } else if (t.type === 'milestone' || !(t.duration > 0)) {
-      item = { start: cs, end: cs, n: 0, runs: [], summary: false, milestone: true };
+      // Convention : un jalon lié à des prédécesseurs se place à la fin du dernier d'entre eux
+      // et porte sa date (un jalon après une tâche finissant le vendredi est daté du vendredi).
+      let depEnd = -Infinity;
+      for (const d of t.deps) { const dt = byId.get(d); if (dt) depEnd = Math.max(depEnd, finish(dt)); }
+      item = depEnd + 1 >= cs
+        ? { start: depEnd, end: depEnd, atEnd: true, n: 0, runs: [], summary: false, milestone: true }
+        : { start: cs, end: cs, atEnd: false, n: 0, runs: [], summary: false, milestone: true };
     } else {
       const accepts = (WHERE[t.where] || WHERE.school).accepts;
       const n = Math.max(1, Math.round(t.duration * 2));
@@ -123,7 +136,8 @@ export function schedule(project, { today = todayDay() } = {}) {
       it.expected = w ? Math.round(exp / w) : ms ? Math.round(msExp / ms) : 0;
     } else {
       it.progress = Math.max(0, Math.min(100, t.progress || 0));
-      if (it.milestone) it.expected = it.start < todaySlot ? 100 : 0;
+      // Un jalon est attendu une fois sa date passée.
+      if (it.milestone) it.expected = dayOfSlot(it.start) < dayOfSlot(todaySlot) ? 100 : 0;
       else {
         let past = 0;
         for (const [a, b] of it.runs) past += Math.max(0, Math.min(b + 1, todaySlot) - a);

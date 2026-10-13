@@ -85,3 +85,28 @@
 - **Sauvegarde** : sans compte, le fichier `.json` *est* la sauvegarde. L'interface rappelle les modifications non enregistrées. Le brouillon local n'est qu'un filet de sécurité, propre à un navigateur et à un poste.
 - **Retards** : une tâche est « en retard » si son % réalisé est inférieur d'au moins 10 points au % attendu, calculé sur les jours travaillés déjà écoulés.
 - **Déplacement à la souris** : déplacer une barre fixe une date « ne pas commencer avant ». Les dépendances et le calendrier restent prioritaires ; la barre se cale alors sur le premier créneau possible.
+
+## Conformité aux conventions des diagrammes de Gantt
+
+Référentiels : usages PMI / PMBOK, MS Project et GanttProject, dates et semaines ISO 8601.
+
+| Convention | État |
+|---|---|
+| Liste des tâches avec n° hiérarchique (WBS), nom, durée, début, fin, % | ✅ |
+| Barres sur une échelle de temps, du début à la fin (dates de fin incluses) | ✅ |
+| Jours non travaillés (week-ends, fériés, vacances) visibles sur la frise | ✅ |
+| Échelles jour / semaine (n° ISO) / mois, ligne « aujourd'hui » | ✅ |
+| Jalons en losange, durée nulle | ✅ |
+| Jalon lié à une tâche : placé et daté à la **fin** de celle-ci | ✅ (corrigé : il pouvait être daté du samedi suivant) |
+| Tâches récapitulatives (groupes) : barre noire à crochets, du début du 1er enfant à la fin du dernier | ✅ |
+| Durée d'un groupe = étendue en jours travaillés | ✅ (corrigé : c'était la somme des sous-tâches) |
+| Avancement d'un groupe pondéré par la durée des sous-tâches | ✅ |
+| Liens fin → début fléchés, détection des boucles | ✅ |
+| Avancement (%) dessiné dans la barre | ✅ |
+| Référence (prévu) affichée sous la barre réelle | ✅ |
+| Ressources affichées à côté des barres | ✅ |
+| Légende, titre, date d'édition sur les exports | ✅ |
+| Autres liens : début → début, fin → fin, début → fin | ❌ volontairement repoussé (lot 6) |
+| Décalage / avance sur un lien (« +2 j ») | ❌ à prévoir (lot 6) |
+| Chemin critique et marge | ❌ volontairement repoussé (lot 6) |
+| Colonne « Prédécesseurs » dans le tableau | ⚠️ visible dans la fiche tâche et l'export CSV, pas dans le tableau |

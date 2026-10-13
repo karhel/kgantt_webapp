@@ -88,7 +88,7 @@ export function buildExportSVG(project, sched, { zoom = 'week', showBaseline = t
     const vals = {
       wbs: row.wbs,
       name: (it.milestone ? '◆ ' : '') + t.name,
-      dur: it.milestone ? '—' : `${String(it.summary ? it.n / 2 : t.duration).replace('.', ',')} j`,
+      dur: it.milestone ? '—' : `${String(it.summary ? it.span : t.duration).replace('.', ',')} j`,
       start: slotLabel(it.start, half),
       end: slotLabel(it.milestone ? it.start : it.end, half),
       pct: `${it.progress}%`,

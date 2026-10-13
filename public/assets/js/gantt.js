@@ -19,6 +19,9 @@ export const HEAD_H = 52;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const r1 = (n) => Math.round(n * 10) / 10;
 
+/** Abscisse d'un jalon : fin de son créneau s'il suit un prédécesseur, sinon début. */
+export const milestoneX = (L, it) => L.x(it.start + (it.atEnd ? 1 : 0));
+
 /** Couleurs et styles du SVG ; les variables --g-* sont définies par le thème (app.css). */
 export const SVG_CSS = `
 .g-head-bg{fill:var(--g-head)}
@@ -240,8 +243,8 @@ export function bodySVG(project, sched, L, opts = {}) {
       const prow = rowOf.get(pid);
       if (!prow) continue;
       const pit = sched.items.get(pid);
-      const x1 = pit.milestone ? L.x(pit.start) + 7 : L.x(pit.end + 1);
-      const x2 = it.milestone ? L.x(it.start) - 7 : L.x(it.start);
+      const x1 = pit.milestone ? milestoneX(L, pit) + 7 : L.x(pit.end + 1);
+      const x2 = it.milestone ? milestoneX(L, it) - 7 : L.x(it.start);
       const y1 = prow.y + L.rowH / 2, y2 = row.y + L.rowH / 2;
       const path = depPath(x1, y1, x2, y2, L.rowH);
       const hit = interactive ? `<path d="${path}" stroke="transparent" stroke-width="10" fill="none" data-role="dep" data-from="${esc(pid)}" data-to="${esc(t.id)}" style="cursor:pointer"><title>Cliquer pour supprimer ce lien</title></path>` : '';
@@ -264,7 +267,7 @@ export function bodySVG(project, sched, L, opts = {}) {
       const bs = parseSlot(base.start), be = parseSlot(base.end);
       if (bs != null && be != null) {
         if (base.milestone) {
-          const bx = L.x(bs);
+          const bx = L.x(bs + (base.atEnd ? 1 : 0));
           g.push(`<path class="bar-baseline" d="M${r1(bx)} ${row.y + L.rowH - 9}l4 4l-4 4l-4 -4z"><title>Prévu : ${formatFR(dayOfSlot(bs))}</title></path>`);
         } else {
           g.push(`<rect class="bar-baseline" x="${r1(L.x(bs))}" y="${row.y + L.rowH - 7}" width="${r1(Math.max(2, L.x(be + 1) - L.x(bs)))}" height="4" rx="2"><title>Prévu : ${formatFR(dayOfSlot(bs))} → ${formatFR(dayOfSlot(be))}</title></rect>`);
@@ -281,7 +284,7 @@ export function bodySVG(project, sched, L, opts = {}) {
       g.push(`<path class="bar-summary" d="M${r1(x0)} ${y + 8}v6l6 -6z M${r1(x1)} ${y + 8}v6l-6 -6z"/>`);
       labelX = x1 + 8;
     } else if (it.milestone) {
-      const cx = L.x(it.start);
+      const cx = milestoneX(L, it);
       const fill = it.progress >= 100 ? color : 'var(--g-milestone-empty, #fff)';
       g.push(`<path d="M${r1(cx)} ${yMid - 8}l8 8l-8 8l-8 -8z" fill="${fill}" stroke="${color}" stroke-width="2" data-role="bar"/>`);
       if (it.status === 'late') g.push(`<path class="bar-late" d="M${r1(cx)} ${yMid - 11}l11 11l-11 11l-11 -11z"/>`);

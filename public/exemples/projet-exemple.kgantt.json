@@ -419,78 +419,93 @@
     "tasks": {
       "g1": {
         "start": "2026-09-07",
-        "end": "2026-09-11",
-        "milestone": false
+        "end": "2026-09-10:pm",
+        "milestone": false,
+        "atEnd": false
       },
       "t11": {
         "start": "2026-09-07",
         "end": "2026-09-08:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t12": {
         "start": "2026-09-09",
         "end": "2026-09-10:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "m13": {
-        "start": "2026-09-11",
-        "end": "2026-09-11",
-        "milestone": true
+        "start": "2026-09-10:pm",
+        "end": "2026-09-10:pm",
+        "milestone": true,
+        "atEnd": true
       },
       "g2": {
         "start": "2026-09-11",
         "end": "2026-09-15:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t21": {
         "start": "2026-09-14",
         "end": "2026-09-15:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t22": {
         "start": "2026-09-11",
         "end": "2026-09-14:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "g3": {
         "start": "2026-09-15",
         "end": "2026-10-08:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t31": {
         "start": "2026-09-21",
         "end": "2026-10-06:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t32": {
         "start": "2026-09-15",
         "end": "2026-09-29:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t33": {
         "start": "2026-10-07",
         "end": "2026-10-08:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "g4": {
         "start": "2026-10-09",
-        "end": "2026-10-13:pm",
-        "milestone": false
+        "end": "2026-10-13",
+        "milestone": false,
+        "atEnd": false
       },
       "t41": {
         "start": "2026-10-09",
         "end": "2026-10-12:pm",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "t42": {
         "start": "2026-10-12",
         "end": "2026-10-13",
-        "milestone": false
+        "milestone": false,
+        "atEnd": false
       },
       "m43": {
-        "start": "2026-10-13:pm",
-        "end": "2026-10-13:pm",
-        "milestone": true
+        "start": "2026-10-13",
+        "end": "2026-10-13",
+        "milestone": true,
+        "atEnd": true
       }
     }
   },
@@ -499,12 +514,12 @@
     "showBaseline": true
   },
   "computed": {
-    "generatedAt": "2026-10-13T13:44:58.645Z",
+    "generatedAt": "2026-10-13T16:15:43.691Z",
     "progress": 25,
     "tasks": {
       "g1": {
         "start": "2026-09-07",
-        "end": "2026-09-11",
+        "end": "2026-09-10:pm",
         "runs": [],
         "summary": true,
         "milestone": false,
@@ -540,8 +555,8 @@
         "status": "done"
       },
       "m13": {
-        "start": "2026-09-11",
-        "end": "2026-09-11",
+        "start": "2026-09-10:pm",
+        "end": "2026-09-10:pm",
         "runs": [],
         "summary": false,
         "milestone": true,
@@ -666,7 +681,7 @@
       },
       "g4": {
         "start": "2026-10-16",
-        "end": "2026-11-03:pm",
+        "end": "2026-11-03",
         "runs": [],
         "summary": true,
         "milestone": false,
@@ -706,8 +721,8 @@
         "status": "todo"
       },
       "m43": {
-        "start": "2026-11-03:pm",
-        "end": "2026-11-03:pm",
+        "start": "2026-11-03",
+        "end": "2026-11-03",
         "runs": [],
         "summary": false,
         "milestone": true,

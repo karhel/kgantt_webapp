@@ -29,7 +29,7 @@ export function toCSV(project, sched) {
       n,
       t.name,
       type,
-      it.summary || it.milestone ? (it.summary ? num(it.n / 2) : 0) : num(t.duration),
+      it.summary || it.milestone ? (it.summary ? num(it.span) : 0) : num(t.duration),
       it.summary ? '' : it.milestone ? '' : WHERE[t.where].label,
       slotLabel(it.start, half),
       slotLabel(it.milestone ? it.start : it.end, half),

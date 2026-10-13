@@ -62,7 +62,7 @@ test('GanttProject : dates conservées avec le calendrier temps plein', () => {
   assert.equal(formatSlot(by('Cahier des charges').start), '2026-09-09');
   assert.equal(formatSlot(by('Développement').start), '2026-09-10');
   assert.equal(formatSlot(by('Développement').end), '2026-09-16:pm');
-  assert.equal(formatSlot(by('Recette').start), '2026-09-17');
+  assert.equal(formatSlot(by('Recette').start), '2026-09-16:pm'); // convention : fin du prédécesseur
 });
 
 test('GanttProject : rejet des fichiers invalides', () => {
