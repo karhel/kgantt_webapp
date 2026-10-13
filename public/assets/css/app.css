@@ -173,6 +173,7 @@ a { color: var(--brand); }
   transition: background .12s, border-color .12s, color .12s, box-shadow .12s;
 }
 .btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+a.btn { text-decoration: none; }
 .btn:focus-visible, .segmented button:focus-visible, .menu-list button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 .btn:disabled { opacity: .45; cursor: default; }
 .btn-primary { background: var(--brand); border-color: var(--brand); color: var(--brand-contrast); }

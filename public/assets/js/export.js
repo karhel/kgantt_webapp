@@ -5,6 +5,7 @@ import { computeLayout, headerSVG, bodySVG, SVG_CSS, SVG_LIGHT_VARS, HEAD_H, ROW
 import { toCSV } from './csv.js';
 import { slotLabel, formatFR, today, toISO, toDay } from './dates.js';
 import { download, slugify, esc } from './ui.js';
+import { computedSnapshot, buildICS } from './ical.js';
 
 const FONT = 'Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
@@ -12,12 +13,18 @@ export function fileBase(project) {
   return slugify(project.project.name);
 }
 
-export function exportJSON(project) {
-  const data = { ...project, savedAt: new Date().toISOString() };
+export function exportJSON(project, sched) {
+  // Les dates calculées accompagnent le fichier : elles servent à l'abonnement iCal (ical.php).
+  const data = { ...project, savedAt: new Date().toISOString(), computed: computedSnapshot(project, sched) };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const name = `${fileBase(project)}.kgantt.json`;
   download(blob, name);
   return name;
+}
+
+export function exportICS(project, sched, opts) {
+  const ics = buildICS(project, computedSnapshot(project, sched), opts);
+  download(new Blob([ics], { type: 'text/calendar;charset=utf-8' }), `${fileBase(project)}.ics`);
 }
 
 export function exportCSV(project, sched) {

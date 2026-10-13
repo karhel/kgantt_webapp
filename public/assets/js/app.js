@@ -11,13 +11,13 @@ import {
   formatSlot, formatShortFR, formatFR, formatLongFR, dayOfSlot, halfOfSlot, toISO, today,
 } from './dates.js';
 import { hydrateIcons, icon } from './icons.js';
-import { esc, toast, confirmDialog, pickJSONFile, readFileAsText } from './ui.js';
+import { esc, toast, confirmDialog, pickJSONFile, pickTextFile, readFileAsText } from './ui.js';
 import {
   openTaskDialog, openProjectDialog, openResourcesDialog, openNewProjectDialog, openExportDialog,
-  openHelpDialog, deleteTasks, logProgress,
+  openHelpDialog, deleteTasks, logProgress, openGanImportDialog, openIcalDialog,
 } from './dialogs.js';
 import { openCalendarDialog } from './calendar-ui.js';
-import { exportJSON, exportCSV, exportPNG, exportPDF } from './export.js';
+import { exportJSON, exportCSV, exportPNG, exportPDF, exportICS } from './export.js';
 
 const config = JSON.parse(document.getElementById('kg-config').textContent);
 const ganttEl = document.getElementById('gantt');
@@ -323,6 +323,8 @@ const actions = {
   save: () => saveFile(),
   example: () => openExample(),
   'export-json': () => saveFile(),
+  'import-gan': () => importGan(),
+  'export-ics': () => openIcalDialog({ onDownload: (o) => exportICS(store.project, store.schedule, o) }),
   'export-csv': () => { exportCSV(store.project, store.schedule); },
   'export-png': () => openExportDialog('png', (o) => exportPNG(store.project, store.schedule, o)),
   'export-pdf': () => openExportDialog('pdf', (o) => exportPDF(store.project, store.schedule, o)),
@@ -376,8 +378,26 @@ async function openExample() {
   } catch { toast('Impossible de charger l’exemple.', { error: true }); }
 }
 
+async function importGan(file = null) {
+  if (!(await confirmDiscard())) return;
+  const f = file || await pickTextFile('.gan,.xml');
+  if (!f) return;
+  openGanImportDialog({
+    fileName: f.name,
+    text: f.text,
+    models: config.models,
+    onImport: (proj) => {
+      store.load(proj, { isDirty: true });
+      selectedId = null;
+      scrollToStart = true;
+      render();
+      toast(`Projet GanttProject importé : ${proj.tasks.length} élément(s). Pensez à l’enregistrer au format K-Gantt (Ctrl+S).`);
+    },
+  });
+}
+
 function saveFile() {
-  const name = exportJSON(store.project);
+  const name = exportJSON(store.project, store.schedule);
   store.markSaved(name);
   toast(`Fichier « ${name} » téléchargé. Gardez-le précieusement : c’est votre sauvegarde.`);
 }
@@ -394,6 +414,10 @@ window.addEventListener('drop', async (e) => {
   overlay.hidden = true;
   const f = e.dataTransfer?.files?.[0];
   if (!f) return;
+  if (/\.(gan|xml)$/i.test(f.name)) {
+    importGan({ name: f.name, text: await readFileAsText(f) });
+    return;
+  }
   if (!(await confirmDiscard())) return;
   try { loadData(JSON.parse(await readFileAsText(f)), f.name); } catch { toast('Ce fichier n’est pas un JSON valide.', { error: true }); }
 });

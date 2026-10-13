@@ -114,3 +114,19 @@ export function pickJSONFile() {
     input.click();
   });
 }
+
+/** Choisit un fichier texte quelconque ; renvoie { name, text } ou null. */
+export function pickTextFile(accept) {
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.addEventListener('change', async () => {
+      const f = input.files?.[0];
+      if (!f) return resolve(null);
+      try { resolve({ name: f.name, text: await readFileAsText(f) }); }
+      catch { toast('Impossible de lire ce fichier.', { error: true }); resolve(null); }
+    });
+    input.click();
+  });
+}

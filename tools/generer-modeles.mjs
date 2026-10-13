@@ -5,6 +5,7 @@ import { defaultCalendar, makeCycle } from '../public/assets/js/calendar.js';
 import { defaultProject, newTask } from '../public/assets/js/project.js';
 import { schedule } from '../public/assets/js/scheduler.js';
 import { formatSlot } from '../public/assets/js/dates.js';
+import { computedSnapshot } from '../public/assets/js/ical.js';
 
 const S = 'school', C = 'company', O = 'off';
 const week = (...days) => [...days, O, O].slice(0, 7).map((t) => [t, t]);
@@ -39,6 +40,7 @@ for (const [file, data] of Object.entries(models)) out(`modeles/calendriers/${fi
 // --- Projet d'exemple ---------------------------------------------------------
 const p = defaultProject();
 p.project = {
+  id: 'exemple-bibliotheque',
   name: 'Application de gestion de bibliothèque',
   description: 'Projet de 1re année : application web de prêt de livres pour le CDI.',
   team: 'Groupe 2 — Léa, Tom, Inès',
@@ -89,5 +91,7 @@ for (const t of initial.tasks) {
   p.baseline.tasks[t.id] = { start: formatSlot(it.start), end: formatSlot(it.milestone ? it.start : it.end), milestone: it.milestone };
 }
 p.view = { zoom: 'week', showBaseline: true };
+// Dates calculées : permettent l'abonnement iCal directement sur ce fichier.
+p.computed = computedSnapshot(p, schedule(p));
 out('exemples/projet-exemple.kgantt.json', p);
 console.log('Modèles et exemple générés.');

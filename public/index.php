@@ -70,6 +70,7 @@ header('Content-Type: text/html; charset=utf-8');
           <button type="button" data-action="open" data-icon="folder">Ouvrir un fichier…<kbd>Ctrl+O</kbd></button>
           <button type="button" data-action="save" data-icon="save">Enregistrer (.json)<kbd>Ctrl+S</kbd></button>
           <hr>
+          <button type="button" data-action="import-gan" data-icon="upload">Importer depuis GanttProject (.gan)…</button>
           <button type="button" data-action="example" data-icon="sparkles">Ouvrir l’exemple</button>
         </div>
       </div>
@@ -80,6 +81,8 @@ header('Content-Type: text/html; charset=utf-8');
           <button type="button" data-action="export-png" data-icon="image">Image PNG…</button>
           <button type="button" data-action="export-csv" data-icon="table">CSV (Excel)</button>
           <button type="button" data-action="export-json" data-icon="code">JSON</button>
+          <hr>
+          <button type="button" data-action="export-ics" data-icon="calendar">Agenda iCal (.ics) et synchronisation…</button>
         </div>
       </div>
       <button class="btn btn-icon btn-ghost" type="button" data-action="theme" data-icon="moon" title="Mode clair / sombre"></button>
@@ -133,7 +136,7 @@ header('Content-Type: text/html; charset=utf-8');
   <footer class="statusbar" id="statusbar"></footer>
 
   <div class="toasts" id="toasts" aria-live="polite"></div>
-  <div class="drop-overlay" id="drop-overlay" hidden><div>Déposez votre fichier <b>.json</b> pour l’ouvrir</div></div>
+  <div class="drop-overlay" id="drop-overlay" hidden><div>Déposez votre fichier <b>.json</b> (ou <b>.gan</b> GanttProject) pour l’ouvrir</div></div>
 
   <script type="application/json" id="kg-config"><?= json_encode([
       'version' => KGANTT_VERSION,

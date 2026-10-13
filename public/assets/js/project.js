@@ -37,6 +37,7 @@ export function defaultProject() {
     format: FILE_FORMAT,
     version: FILE_VERSION,
     project: {
+      id: uid('p'), // identifiant stable (sert aux identifiants des évènements iCal)
       name: 'Mon projet',
       description: '',
       team: '',

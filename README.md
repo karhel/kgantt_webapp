@@ -51,13 +51,33 @@ Dans le diagramme, les barres montrent les jours réellement travaillés : une t
   - **PNG** ;
   - **CSV** compatible Excel en français (séparateur `;`, UTF-8 avec BOM) ;
   - **JSON**.
+  - **iCal (.ics)** : un évènement par période travaillée (seuls les jours où la tâche avance) ou un évènement par tâche.
+- **Import GanttProject (.gan)** : tâches, sous-tâches, jalons, liens, avancement, notes, couleurs, ressources et affectations, jours fériés datés. On choisit le calendrier (temps plein ou alternance), le lieu des tâches, et on peut conserver les dates d'origine.
+- **Synchronisation avec un agenda** (Google Agenda, Outlook, Apple Calendrier) par abonnement iCal, voir ci-dessous
 - Thème clair et **mode sombre**
+
+### Synchronisation iCal (abonnement)
+
+Il n'y a aucun stockage sur le serveur, donc l'abonnement lit le fichier du projet là où l'étudiant l'a déposé :
+
+1. L'étudiant enregistre son projet. Le fichier `.kgantt.json` contient aussi les dates calculées (section `computed`).
+2. Il dépose ce fichier sur un espace en ligne avec un **lien public** : Nextcloud de l'établissement, Dropbox, Google Drive ou GitHub. Les liens de partage de ces services sont convertis automatiquement en liens de téléchargement.
+3. *Exporter → Agenda iCal* fournit l'adresse d'abonnement `https://kgantt.phoen-ix.net/ical.php?url=…`, à ajouter dans l'agenda.
+4. À chaque nouveau dépôt du fichier, l'agenda se met à jour au rythme d'actualisation de l'application. Google Agenda peut mettre plusieurs heures.
+
+Protections de `ical.php` :
+- le serveur n'accepte que le **HTTPS** sur le port 443 ;
+- il refuse les **adresses privées ou réservées** (pas d'accès au réseau interne) et vérifie l'adresse IP à chaque redirection (3 au maximum) ;
+- les fichiers sont limités à **3 Mo** et le téléchargement à 10 s ;
+- rien n'est conservé.
+
+Pour désactiver la fonction, mettez `KGANTT_ICAL_ENABLED` à `false` dans `public/ical.php`. L'extension PHP **cURL** est requise ; elle est active par défaut chez o2switch.
 
 ---
 
 ## Installation sur o2switch
 
-L'application n'a besoin que de **PHP ≥ 7.4** (PHP 8.x recommandé), sans base de données ni dépendance à installer.
+L'application n'a besoin que de **PHP ≥ 8.0** (avec cURL pour l'abonnement iCal), sans base de données ni dépendance à installer.
 
 1. Dans cPanel, créez le sous-domaine `kgantt.phoen-ix.net`. Notez son dossier racine, par exemple `~/kgantt.phoen-ix.net`.
 2. Activez le certificat **SSL Let's Encrypt** pour le sous-domaine (cPanel → *Let's Encrypt SSL*). Le `.htaccess` force ensuite le HTTPS.
@@ -65,6 +85,8 @@ L'application n'a besoin que de **PHP ≥ 7.4** (PHP 8.x recommandé), sans base
    ```
    public/
    ├── index.php              ← page de l'application
+   ├── ical.php               ← abonnement iCal (lit un .kgantt.json public, ne stocke rien)
+   ├── inc/                   ← bibliothèque PHP (non accessible depuis le web)
    ├── .htaccess              ← HTTPS, en-têtes de sécurité, cache
    ├── assets/                ← CSS, JavaScript, jsPDF, icônes
    ├── modeles/calendriers/   ← modèles de calendrier proposés aux étudiants
@@ -106,6 +128,9 @@ node tools/generer-modeles.mjs
 | `assets/js/app.js` | Interface : tableau, interactions, clavier, menus |
 | `assets/js/dialogs.js`, `calendar-ui.js` | Fenêtres : tâche, projet, ressources, export, aide, calendrier |
 | `assets/js/export.js`, `csv.js` | Exports JSON, CSV, PNG, PDF |
+| `assets/js/ical.js` | Génération iCalendar (.ics) et dates calculées enregistrées dans le fichier |
+| `assets/js/ganttproject.js`, `xml.js` | Import des fichiers GanttProject (.gan) |
+| `public/ical.php`, `inc/ical-lib.php` | Abonnement iCal côté serveur (même résultat que `ical.js`, vérifié par les tests) |
 | `assets/vendor/jspdf.umd.min.js` | [jsPDF](https://github.com/parallax/jsPDF) 2.5.1 (MIT) |
 | `tests/` | Tests unitaires (`node --test`) |
 
@@ -116,7 +141,7 @@ Pas de framework ni d'étape de compilation : les fichiers sont des modules ES s
 ```jsonc
 {
   "format": "kgantt", "version": 1,
-  "project":  { "name": "…", "team": "…", "className": "…", "teacher": "…", "start": "2026-09-07", "halfDays": false },
+  "project":  { "id": "p…", "name": "…", "team": "…", "className": "…", "teacher": "…", "start": "2026-09-07", "halfDays": false },
   "calendar": {
     "format": "kgantt-calendar", "version": 1, "name": "…",
     "weekTemplates": { "school": [["school","school"], …7 jours], "company": [ … ] }, // [matin, après-midi]
@@ -135,7 +160,9 @@ Pas de framework ni d'étape de compilation : les fichiers sont des modules ES s
     "log": [{ "date": "2026-09-14", "progress": 50, "note": "…" }]
   }],
   "baseline": { "date": "2026-09-07", "tasks": { "t1": { "start": "2026-09-07", "end": "2026-09-08:pm" } } },
-  "view": { "zoom": "week", "showBaseline": true }
+  "view": { "zoom": "week", "showBaseline": true },
+  // Ajouté à l'enregistrement, ignoré à l'ouverture : dates calculées pour l'abonnement iCal
+  "computed": { "generatedAt": "…", "tasks": { "t1": { "start": "…", "end": "…", "runs": [["2026-09-07", "2026-09-08:pm"]], "progress": 50, "status": "progress" } } }
 }
 ```
 

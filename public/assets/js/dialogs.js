@@ -8,6 +8,7 @@ import { STATUS_LABELS } from './scheduler.js';
 import { openModal, esc, toast, confirmDialog } from './ui.js';
 import { icon } from './icons.js';
 import { ZOOMS } from './gantt.js';
+import { importGanttProject } from './ganttproject.js';
 
 const num = (v) => String(v).replace('.', ',');
 
@@ -399,9 +400,154 @@ export function openHelpDialog(version) {
           <kbd>Ctrl + O</kbd><span>Ouvrir un fichier</span>
         </div>
         <h3 style="margin-top:14px">Vos données</h3>
+        <h3 style="margin-top:14px">GanttProject et agendas</h3>
+        <p><b>Fichier → Importer depuis GanttProject</b> reprend un projet .gan existant. <b>Exporter → Agenda iCal</b> ajoute les tâches à Google Agenda, Outlook ou Apple Calendrier, une fois ou par abonnement (mise à jour automatique).</p>
         <p>Rien n’est envoyé sur le serveur. Votre travail est enregistré dans un <b>fichier .json</b> que vous gardez (Fichier → Enregistrer). Un brouillon est aussi conservé dans ce navigateur en cas de fermeture accidentelle.</p>
         <p class="muted" style="margin-top:10px">K-Gantt version ${esc(version)}</p>
       </div></div>`,
     foot: '<span class="spacer"></span><button class="btn btn-primary" type="button" data-close="ok">Compris</button>',
+  });
+}
+
+// --- Import GanttProject -----------------------------------------------------------------
+
+export function openGanImportDialog({ fileName, text, models, onImport }) {
+  let preview;
+  try {
+    preview = importGanttProject(text);
+  } catch (err) {
+    toast(err.message, { error: true });
+    return;
+  }
+  const opts = models.map((md, i) => `<option value="${i}">${esc(md.name)}</option>`).join('');
+  const st = preview.stats;
+  const whereCards = Object.entries(WHERE).map(([k, w]) => `<label><input type="radio" name="g-where" value="${k}" ${k === 'any' ? 'checked' : ''}><span>${w.label}</span><small>${k === 'school' ? 'jours de cours uniquement' : k === 'company' ? 'jours en entreprise' : 'comme GanttProject (jours ouvrés)'}</small></label>`).join('');
+  const m = openModal({
+    title: 'Importer un projet GanttProject',
+    body: `<div class="form-grid">
+      <div class="info-box"><span>Fichier : <b>${esc(fileName)}</b></span><span>Projet : <b>${esc(preview.project.project.name)}</b></span>
+        <span><b>${st.tasks}</b> tâche(s), <b>${st.milestones}</b> jalon(s), <b>${st.deps}</b> lien(s), <b>${st.resources}</b> ressource(s)</span></div>
+      ${preview.warnings.length ? `<div class="full muted" style="font-size:13px"><b>À savoir :</b><ul style="margin:4px 0 0;padding-left:18px">${preview.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
+      <div class="field full"><label for="g-cal">Calendrier du projet importé</label>
+        <select id="g-cal"><option value="">Temps plein (lundi → vendredi), comme GanttProject</option>${opts}<option value="current">Calendrier du projet actuel</option></select>
+        <span class="hint">GanttProject compte les jours ouvrés. Avec un calendrier d’alternance, les durées deviennent des jours de présence et les dates s’allongent.</span></div>
+      <div class="field full"><span class="label">Lieu des tâches importées</span><div class="radio-cards">${whereCards}</div></div>
+      <div class="field full"><label class="check"><input type="checkbox" id="g-keep" checked> Conserver les dates de début de GanttProject</label>
+        <span class="hint">Chaque tâche reçoit une contrainte « ne pas commencer avant » sa date d’origine. Décochez pour laisser K-Gantt tout replanifier au plus tôt.</span></div>
+    </div>`,
+    foot: `<span class="spacer"></span><button class="btn" type="button" data-close="cancel">Annuler</button>
+      <button class="btn btn-primary" type="button" id="g-go">${icon('upload')} Importer</button>`,
+  });
+  m.$('#g-go').addEventListener('click', async () => {
+    const v = m.$('#g-cal').value;
+    let calendar = null;
+    try {
+      if (v === 'current') calendar = store.project.calendar;
+      else if (v !== '') calendar = await (await fetch(models[+v].file, { cache: 'no-cache' })).json();
+    } catch {
+      toast('Modèle de calendrier introuvable : calendrier temps plein utilisé.', { error: true });
+    }
+    try {
+      const res = importGanttProject(text, {
+        where: m.$('input[name="g-where"]:checked').value,
+        keepDates: m.$('#g-keep').checked,
+        calendar,
+      });
+      m.close('import');
+      onImport(res.project);
+    } catch (err) {
+      toast(err.message, { error: true });
+    }
+  });
+}
+
+// --- Agenda iCal ---------------------------------------------------------------------------
+
+export function openIcalDialog({ onDownload }) {
+  const P = store.project.project;
+  const base = new URL('ical.php', window.location.href).href;
+  const m = openModal({
+    title: 'Agenda iCal',
+    wide: true,
+    body: `<div class="form-grid">
+      <div class="field full"><span class="label">Contenu de l’agenda</span>
+        <div class="radio-cards two">
+          <label><input type="radio" name="i-mode" value="runs" checked><span>Un évènement par période travaillée</span><small>idéal en alternance : seuls les jours où la tâche avance</small></label>
+          <label><input type="radio" name="i-mode" value="span"><span>Un évènement par tâche</span><small>du début à la fin, sans interruption</small></label>
+        </div>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="i-groups"> Inclure les groupes de tâches</label>
+      </div>
+
+      <div class="section-title">1. Fichier à importer (une fois)</div>
+      <div class="full inline">
+        <span class="muted" style="flex:1">Téléchargez un fichier <b>.ics</b> et importez-le dans Google Agenda, Outlook ou Apple Calendrier. Pour le mettre à jour, importez à nouveau le fichier : les évènements gardent le même identifiant.</span>
+        <button class="btn btn-primary" type="button" id="i-download">${icon('download')} Télécharger le .ics</button>
+      </div>
+
+      <div class="section-title">2. Synchronisation automatique (abonnement)</div>
+      <ol class="full" style="margin:0;padding-left:20px;font-size:13px;display:grid;gap:4px">
+        <li><b>Enregistrez</b> votre projet (Fichier → Enregistrer) puis déposez le fichier <b>.kgantt.json</b> sur un espace en ligne avec un <b>lien de partage public</b> : Nextcloud de l’établissement, Dropbox, Google Drive, GitHub…</li>
+        <li>Collez ce lien ci-dessous et copiez l’<b>adresse d’abonnement</b>.</li>
+        <li>Dans votre agenda : <i>Google Agenda</i> → Autres agendas → « À partir de l’URL » ; <i>Outlook</i> → Ajouter un calendrier → « S’abonner à partir du web » ; <i>Apple Calendrier</i> → Fichier → « Nouvel abonnement ».</li>
+        <li>Ensuite, à chaque fois que vous remplacez le fichier en ligne, l’agenda se met à jour tout seul (de quelques minutes à quelques heures selon l’application).</li>
+      </ol>
+      <div class="field full"><label for="i-src">Lien public du fichier .kgantt.json</label>
+        <input type="text" id="i-src" placeholder="https://cloud.mon-lycee.fr/s/AbCdEf…" value="${esc(P.shareUrl || '')}"></div>
+      <div class="field full"><label for="i-sub">Adresse d’abonnement à copier dans l’agenda</label>
+        <div class="inline">
+          <input type="text" id="i-sub" readonly placeholder="Collez d’abord le lien de votre fichier">
+          <button class="btn" type="button" id="i-copy">${icon('copy')} Copier</button>
+          <a class="btn" id="i-webcal" href="#" title="Ouvrir directement dans l’application d’agenda de cet ordinateur">${icon('calendar')} Ouvrir</a>
+          <button class="btn" type="button" id="i-test">${icon('check')} Tester</button>
+        </div>
+        <span class="hint" id="i-result">Le fichier est lu à chaque actualisation de l’agenda ; rien n’est conservé sur le serveur K-Gantt.</span></div>
+    </div>`,
+    foot: '<span class="spacer"></span><button class="btn" type="button" data-close="ok">Fermer</button>',
+  });
+  const { $ } = m;
+  const opts = () => ({ mode: m.$('input[name="i-mode"]:checked').value, groups: $('#i-groups').checked });
+  const subUrl = () => {
+    const src = $('#i-src').value.trim();
+    if (!/^https:\/\/\S+$/i.test(src)) return '';
+    const o = opts();
+    return `${base}?url=${encodeURIComponent(src)}${o.mode === 'span' ? '&mode=span' : ''}${o.groups ? '&groupes=1' : ''}`;
+  };
+  const refresh = () => {
+    const u = subUrl();
+    $('#i-sub').value = u;
+    $('#i-webcal').href = u ? u.replace(/^https?:/, 'webcal:') : '#';
+    for (const id of ['#i-copy', '#i-test']) $(id).disabled = !u;
+    $('#i-webcal').style.pointerEvents = u ? '' : 'none';
+    $('#i-webcal').style.opacity = u ? '' : '.45';
+    const src = $('#i-src').value.trim();
+    $('#i-result').textContent = src && !u ? 'Le lien doit commencer par https://' : 'Le fichier est lu à chaque actualisation de l’agenda ; rien n’est conservé sur le serveur K-Gantt.';
+  };
+  refresh();
+  m.dialog.addEventListener('input', refresh);
+  m.dialog.addEventListener('change', refresh);
+  $('#i-src').addEventListener('change', () => {
+    const v = $('#i-src').value.trim();
+    if (v !== (store.project.project.shareUrl || '')) store.update((p) => { p.project.shareUrl = v; }, { history: false });
+  });
+  $('#i-download').addEventListener('click', () => onDownload(opts()));
+  $('#i-copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#i-sub').value); toast('Adresse d’abonnement copiée.'); }
+    catch { $('#i-sub').select(); toast('Copiez l’adresse sélectionnée (Ctrl+C).'); }
+  });
+  $('#i-test').addEventListener('click', async () => {
+    const out = $('#i-result');
+    out.textContent = 'Test en cours…';
+    out.style.color = '';
+    try {
+      const res = await fetch(subUrl(), { cache: 'no-store' });
+      const body = await res.text();
+      if (!res.ok) throw new Error(body || `Erreur ${res.status}`);
+      const n = (body.match(/BEGIN:VEVENT/g) || []).length;
+      out.textContent = `✓ L’abonnement fonctionne : ${n} évènement(s). Vérifiez que le fichier en ligne est bien votre dernière version.`;
+      out.style.color = 'var(--success)';
+    } catch (err) {
+      out.textContent = `✗ ${err.message}`;
+      out.style.color = 'var(--danger)';
+    }
   });
 }

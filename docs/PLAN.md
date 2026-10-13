@@ -13,7 +13,9 @@
 | Dépendances | Fin → début uniquement (V1). |
 | Ressources, prévu / réel | Oui. Pas de chemin critique pour l'instant. |
 | Avancement | % par tâche + journal daté ; % global pondéré par les durées. |
-| Exports | PDF (A4 / A3 paysage, en-tête), PNG, CSV (`;`), JSON. Pas d'import GanttProject. |
+| Exports | PDF (A4 / A3 paysage, en-tête), PNG, CSV (`;`), JSON, iCal (.ics). |
+| Import | GanttProject (.gan). |
+| Synchronisation agenda | Abonnement iCal via `ical.php`, qui lit un `.kgantt.json` déposé publiquement par l'étudiant (rien n'est stocké). |
 | Technique | PHP 8 + HTML + JS (modules ES), rendu Gantt fait maison en SVG, jsPDF hébergé localement. |
 | Cible | Ordinateur, interface en français, mode sombre. Hébergement o2switch sur `kgantt.phoen-ix.net`. |
 | Identité visuelle | Famille « K- » (comme kgrades / kshare) : à aligner, voir lot 6. |
@@ -51,10 +53,19 @@
 - [x] Exports CSV, JSON, PNG, PDF (une page ou plusieurs pages)
 - [x] Projet d'exemple
 
+### ✅ Lot 4 bis — GanttProject et agendas
+- [x] Import `.gan` : arborescence, jalons, liens (autres types convertis en fin → début), avancement, notes, couleurs, ressources, affectations, jours fériés datés
+- [x] Options d'import : calendrier, lieu des tâches, conservation des dates d'origine ; aperçu et avertissements
+- [x] Export `.ics` : un évènement par période travaillée ou par tâche, identifiants stables
+- [x] Dates calculées enregistrées dans le `.kgantt.json` (section `computed`)
+- [x] `ical.php` : abonnement sans stockage, conversion des liens de partage (Nextcloud, Dropbox, Google Drive, GitHub), protection contre l'accès au réseau interne
+- [x] Tests : lecteur XML, import, iCal, parité PHP / JS
+
 ### ⏳ Lot 5 — Recette avec une classe pilote
 - [ ] Tester avec un groupe d'étudiants sur un vrai projet (et un vrai calendrier d'alternance)
 - [ ] Recueillir les retours : vocabulaire, raccourcis, lisibilité des exports
 - [ ] Vérifier sur Firefox, Chrome, Edge et Safari récents
+- [ ] Tester l'abonnement iCal en conditions réelles (Nextcloud de l'établissement, Google Agenda, Outlook)
 - [ ] Déploiement sur `kgantt.phoen-ix.net`
 
 ### 🔜 Lot 6 — Améliorations proposées
@@ -67,6 +78,7 @@
 - [ ] Modèles de projet (trames de tâches types fournies par l'enseignant)
 - [ ] Export PDF du journal d'avancement (pour l'évaluation)
 - [ ] Mode lecture seule « enseignant » pour ouvrir plusieurs fichiers d'étudiants
+- [ ] Export vers GanttProject (.gan), si besoin pendant la transition
 
 ## Points d'attention
 

@@ -2,6 +2,7 @@
   "format": "kgantt",
   "version": 1,
   "project": {
+    "id": "exemple-bibliotheque",
     "name": "Application de gestion de bibliothèque",
     "description": "Projet de 1re année : application web de prêt de livres pour le CDI.",
     "team": "Groupe 2 — Léa, Tom, Inès",
@@ -496,5 +497,223 @@
   "view": {
     "zoom": "week",
     "showBaseline": true
+  },
+  "computed": {
+    "generatedAt": "2026-10-13T13:44:58.645Z",
+    "progress": 25,
+    "tasks": {
+      "g1": {
+        "start": "2026-09-07",
+        "end": "2026-09-11",
+        "runs": [],
+        "summary": true,
+        "milestone": false,
+        "progress": 100,
+        "status": "done"
+      },
+      "t11": {
+        "start": "2026-09-07",
+        "end": "2026-09-08:pm",
+        "runs": [
+          [
+            "2026-09-07",
+            "2026-09-08:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 100,
+        "status": "done"
+      },
+      "t12": {
+        "start": "2026-09-09",
+        "end": "2026-09-10:pm",
+        "runs": [
+          [
+            "2026-09-09",
+            "2026-09-10:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 100,
+        "status": "done"
+      },
+      "m13": {
+        "start": "2026-09-11",
+        "end": "2026-09-11",
+        "runs": [],
+        "summary": false,
+        "milestone": true,
+        "progress": 100,
+        "status": "done"
+      },
+      "g2": {
+        "start": "2026-09-11",
+        "end": "2026-09-21:pm",
+        "runs": [],
+        "summary": true,
+        "milestone": false,
+        "progress": 48,
+        "status": "late"
+      },
+      "t21": {
+        "start": "2026-09-14",
+        "end": "2026-09-21:pm",
+        "runs": [
+          [
+            "2026-09-14",
+            "2026-09-15:pm"
+          ],
+          [
+            "2026-09-21",
+            "2026-09-21:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 60,
+        "status": "late"
+      },
+      "t22": {
+        "start": "2026-09-11",
+        "end": "2026-09-14:pm",
+        "runs": [
+          [
+            "2026-09-11",
+            "2026-09-11:pm"
+          ],
+          [
+            "2026-09-14",
+            "2026-09-14:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 30,
+        "status": "late"
+      },
+      "g3": {
+        "start": "2026-09-15",
+        "end": "2026-10-15:pm",
+        "runs": [],
+        "summary": true,
+        "milestone": false,
+        "progress": 0,
+        "status": "late"
+      },
+      "t31": {
+        "start": "2026-09-22",
+        "end": "2026-10-12:pm",
+        "runs": [
+          [
+            "2026-09-22",
+            "2026-09-22:pm"
+          ],
+          [
+            "2026-09-28",
+            "2026-09-29:pm"
+          ],
+          [
+            "2026-10-05",
+            "2026-10-06:pm"
+          ],
+          [
+            "2026-10-12",
+            "2026-10-12:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 0,
+        "status": "late"
+      },
+      "t32": {
+        "start": "2026-09-15",
+        "end": "2026-09-29:pm",
+        "runs": [
+          [
+            "2026-09-15",
+            "2026-09-15:pm"
+          ],
+          [
+            "2026-09-21",
+            "2026-09-22:pm"
+          ],
+          [
+            "2026-09-28",
+            "2026-09-29:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 0,
+        "status": "late"
+      },
+      "t33": {
+        "start": "2026-10-14",
+        "end": "2026-10-15:pm",
+        "runs": [
+          [
+            "2026-10-14",
+            "2026-10-15:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 0,
+        "status": "todo"
+      },
+      "g4": {
+        "start": "2026-10-16",
+        "end": "2026-11-03:pm",
+        "runs": [],
+        "summary": true,
+        "milestone": false,
+        "progress": 0,
+        "status": "todo"
+      },
+      "t41": {
+        "start": "2026-10-16",
+        "end": "2026-11-02:pm",
+        "runs": [
+          [
+            "2026-10-16",
+            "2026-10-16:pm"
+          ],
+          [
+            "2026-11-02",
+            "2026-11-02:pm"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 0,
+        "status": "todo"
+      },
+      "t42": {
+        "start": "2026-11-02",
+        "end": "2026-11-03",
+        "runs": [
+          [
+            "2026-11-02",
+            "2026-11-03"
+          ]
+        ],
+        "summary": false,
+        "milestone": false,
+        "progress": 0,
+        "status": "todo"
+      },
+      "m43": {
+        "start": "2026-11-03:pm",
+        "end": "2026-11-03:pm",
+        "runs": [],
+        "summary": false,
+        "milestone": true,
+        "progress": 0,
+        "status": "todo"
+      }
+    }
   }
 }

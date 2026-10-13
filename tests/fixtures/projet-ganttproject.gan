@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Site web &amp; BDD" company="Lycée" webLink="http://" view-date="2026-09-01" view-index="0" gantt-divider-location="374" resource-divider-location="322" version="3.2.3247" locale="fr_FR">
+    <description><![CDATA[Projet de 2e année <important>]]></description>
+    <view zooming-state="default:3" id="gantt-chart">
+        <field id="tpd3" name="Nom" width="167" order="0"/>
+    </view>
+    <!-- Calendrier -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+        <date year="2026" month="10" date="2" type="HOLIDAY" description="Journée pédagogique"/>
+        <date year="" month="12" date="25" type="HOLIDAY"/>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+        </taskproperties>
+        <task id="0" uid="a1" name="Analyse" color="#8cb6ce" meeting="false" start="2026-09-07" duration="3" complete="100" thirdDate="2026-09-07" thirdDate-constraint="0" expand="true">
+            <notes><![CDATA[Interview du client]]></notes>
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <task id="1" uid="a2" name="Recueil des besoins" color="#8cb6ce" meeting="false" start="2026-09-07" duration="2" complete="100" expand="true">
+                <depend id="2" type="2" difference="0" hardness="Strong"/>
+            </task>
+            <task id="2" uid="a3" name="Cahier des charges" color="#ff0000" meeting="false" start="2026-09-09" duration="1" complete="50" expand="true">
+                <depend id="0" type="2" difference="0" hardness="Strong"/>
+            </task>
+        </task>
+        <task id="3" uid="a4" name="Développement" color="#8cb6ce" meeting="false" start="2026-09-10" duration="5" complete="0" expand="false">
+            <depend id="4" type="3" difference="2" hardness="Rubber"/>
+        </task>
+        <task id="4" uid="a5" name="Recette" meeting="true" start="2026-09-17" duration="0" complete="0" expand="true"/>
+    </tasks>
+    <resources>
+        <resource id="0" name="Léa Martin" function="Default:1" contacts="" phone=""/>
+        <resource id="1" name="Tom" function="Default:0" contacts="" phone=""/>
+    </resources>
+    <allocations>
+        <allocation task-id="1" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="3" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="3" resource-id="1" function="Default:0" responsible="false" load="50.0"/>
+    </allocations>
+    <vacations/>
+    <previous>
+        <previous-tasks name="Initial">
+            <previous-task id="0" start="2026-09-07" duration="3" meeting="false" super="true"/>
+        </previous-tasks>
+    </previous>
+    <roles roleset-name="Default"/>
+</project>
