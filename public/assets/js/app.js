@@ -11,7 +11,7 @@ import { durationBetween, STATUS_LABELS } from './scheduler.js';
 import {
   formatSlot, formatShortFR, formatFR, formatLongFR, dayOfSlot, halfOfSlot, toISO, today,
 } from './dates.js';
-import { hydrateIcons, icon } from './icons.js';
+import { hydrateIcons, icon, statusIcon } from './icons.js';
 import { esc, toast, confirmDialog, pickJSONFile, pickTextFile, readFileAsText } from './ui.js';
 import {
   openTaskDialog, openProjectDialog, openResourcesDialog, openNewProjectDialog, openExportDialog,
@@ -46,17 +46,17 @@ function render() {
 function renderHeader() {
   const P = store.project.project;
   document.getElementById('project-name').textContent = P.name;
-  document.getElementById('project-sub').textContent = [P.team, P.className].filter(Boolean).join(' • ') || 'Cliquer pour renseigner l’équipe et la classe';
+  document.getElementById('project-sub').textContent = [P.team, P.className].filter(Boolean).join(' · ') || 'Renseigner l’équipe et la classe';
   document.title = `${P.name} — K-Gantt`;
   const s = document.getElementById('save-state');
   s.classList.toggle('is-dirty', store.dirty);
-  s.textContent = store.dirty ? 'Non enregistré' : store.fileName ? `Enregistré · ${store.fileName}` : '';
-  s.title = store.dirty ? 'Pensez à enregistrer votre fichier .json (Ctrl+S). Un brouillon est gardé dans ce navigateur.' : '';
+  s.textContent = store.dirty ? 'Modifications non enregistrées' : store.fileName ? `Enregistré dans ${store.fileName}` : '';
+  s.title = store.dirty ? 'Enregistrez votre fichier .json (Ctrl+S). Un brouillon est aussi gardé dans ce navigateur.' : '';
 }
 
 function renderToolbar() {
   const zoom = store.project.view.zoom || 'day';
-  document.querySelectorAll('[data-zoom]').forEach((b) => b.classList.toggle('is-active', b.dataset.zoom === zoom));
+  document.querySelectorAll('[data-zoom]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.zoom === zoom)));
   const sel = selectedTask();
   const set = (action, enabled) => document.querySelectorAll(`[data-action="${action}"]`).forEach((b) => { b.disabled = !enabled; });
   set('undo', store.canUndo);
@@ -70,40 +70,49 @@ function renderToolbar() {
   const theme = effectiveTheme();
   const tb = document.querySelector('[data-action="theme"]');
   tb.innerHTML = icon(theme === 'dark' ? 'sun' : 'moon');
+  tb.setAttribute('aria-label', theme === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre');
 }
 
-function dateCell(slot, half) {
+function slotText(slot, half) {
+  const d = dayOfSlot(slot);
+  return `${formatLongFR(d)}${half ? (halfOfSlot(slot) ? ', après-midi' : ', matin') : ''}`;
+}
+
+function dateCell(slot, half, what, wbs) {
   const d = dayOfSlot(slot);
   const label = half ? `${formatShortFR(d)} ${halfOfSlot(slot) ? 'ap.-m.' : 'matin'}` : formatFR(d);
-  return `<div class="g-date" data-open title="${esc(formatLongFR(d))}${half ? (halfOfSlot(slot) ? ', après-midi' : ', matin') : ''}">${label}</div>`;
+  return `<div><button type="button" class="g-date" data-open="${what === 'Début' ? 'start' : 'end'}" aria-label="${what} : ${esc(slotText(slot, half))}. Ouvrir la fiche de la tâche ${wbs}" title="${esc(slotText(slot, half))}">${label}</button></div>`;
 }
 
 function rowHTML(row, sched, half) {
   const t = row.task;
   const it = sched.items.get(t.id);
   const summary = it.summary;
+  const n = row.wbs;
   const toggle = summary
-    ? `<button class="g-toggle" type="button" data-toggle title="${t.collapsed ? 'Déplier' : 'Replier'}">${icon(t.collapsed ? 'chevronRight' : 'chevronDown', 14)}</button>`
+    ? `<button class="g-toggle" type="button" data-toggle aria-expanded="${!t.collapsed}" aria-label="${t.collapsed ? 'Déplier' : 'Replier'} le groupe ${esc(t.name)}">${icon(t.collapsed ? 'chevronRight' : 'chevronDown', 16)}</button>`
     : '<span class="g-toggle-spacer"></span>';
-  const ms = it.milestone && !summary ? `<span class="g-ms">${icon('diamond', 13)}</span>` : '';
+  const ms = it.milestone && !summary ? `<span class="g-ms" role="img" aria-label="Jalon">${icon('diamond', 13)}</span>` : '';
   const step = half ? 0.5 : 1;
-  const dur = summary ? `<span class="g-ro" style="display:block">${String(it.span).replace('.', ',')} j</span>`
-    : it.milestone ? '<span class="g-ro" style="display:block">—</span>'
-      : `<input type="number" data-f="duration" min="${step}" step="${step}" value="${t.duration}" title="Durée en jours de présence">`;
+  const dur = summary ? `<span class="g-ro">${String(it.span).replace('.', ',')} j</span>`
+    : it.milestone ? '<span class="g-ro" aria-label="Aucune durée (jalon)">—</span>'
+      : `<input type="number" data-f="duration" min="${step}" step="${step}" value="${t.duration}" aria-label="Durée en jours de présence, tâche ${n}">`;
   const where = summary || it.milestone ? ''
-    : `<select data-f="where" title="Jours comptés">${Object.entries(WHERE).map(([k, w]) => `<option value="${k}"${t.where === k ? ' selected' : ''}>${w.label}</option>`).join('')}</select>`;
-  const pct = summary ? `<span class="g-ro" style="display:block">${it.progress} %</span>`
-    : `<input type="number" data-f="progress" min="0" max="100" step="5" value="${t.progress}" title="Avancement (%)">`;
-  const statusTitle = `${STATUS_LABELS[it.status]} — réalisé ${it.progress} %, attendu ${it.expected} %${it.error ? ` — ${it.error}` : ''}`;
-  return `<div class="g-row${summary ? ' is-summary' : ''}${t.id === selectedId ? ' is-selected' : ''}" data-id="${esc(t.id)}">
-    <div class="g-wbs">${row.wbs}</div>
-    <div class="g-name" style="padding-left:${row.depth * 16 + 2}px">${toggle}${ms}<input type="text" data-f="name" value="${esc(t.name)}" title="${esc(t.name)}"></div>
+    : `<select data-f="where" aria-label="Lieu (jours comptés), tâche ${n}">${Object.entries(WHERE).map(([k, w]) => `<option value="${k}"${t.where === k ? ' selected' : ''}>${w.label}</option>`).join('')}</select>`;
+  const pct = summary ? `<span class="g-ro">${it.progress} %</span>`
+    : `<input type="number" data-f="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="Avancement en pourcentage, tâche ${n}">`;
+  const status = it.error ? 'late' : it.status;
+  const statusText = `${it.error ? 'Erreur : ' + it.error : STATUS_LABELS[it.status]} (réalisé ${it.progress} %, attendu ${it.expected} %)`;
+  const kind = summary ? 'Groupe' : it.milestone ? 'Jalon' : 'Tâche';
+  return `<div class="g-row${summary ? ' is-summary' : ''}${t.id === selectedId ? ' is-selected' : ''}" data-id="${esc(t.id)}" role="group" aria-label="${kind} ${n} : ${esc(t.name)}"${t.id === selectedId ? ' aria-current="true"' : ''}>
+    <div class="g-wbs" aria-hidden="true">${n}</div>
+    <div class="g-name" style="padding-left:${row.depth * 16 + 2}px">${toggle}${ms}<input type="text" data-f="name" value="${esc(t.name)}" aria-label="Nom, ${kind.toLowerCase()} ${n}"></div>
     <div>${dur}</div>
     <div>${where}</div>
-    ${dateCell(it.start, half)}
-    ${dateCell(it.milestone ? it.start : it.end, half)}
+    ${dateCell(it.start, half, 'Début', n)}
+    ${dateCell(it.milestone ? it.start : it.end, half, 'Fin', n)}
     <div>${pct}</div>
-    <div class="g-status" title="${esc(statusTitle)}"><span class="dot dot-${it.error ? 'late' : it.status}"></span></div>
+    <div class="g-status" title="${esc(statusText)}">${statusIcon(status)}<span class="sr-only">${esc(statusText)}</span></div>
   </div>`;
 }
 
@@ -125,23 +134,25 @@ function renderGantt() {
   const body = bodySVG(project, sched, L, { selectedId, showBaseline, minHeight: minH });
   const half = project.project.halfDays;
 
-  ganttEl.style.setProperty('--table-w', `${tableW}px`);
+  // Le tableau ne masque jamais le diagramme : au plus 60 % de la largeur (fenêtre étroite, zoom 200 %).
+  const effW = Math.min(tableW, Math.max(280, Math.round((ganttEl.clientWidth || 1200) * 0.6)));
+  ganttEl.style.setProperty('--table-w', `${effW}px`);
   ganttEl.innerHTML = `
     <div class="g-scroll">
-      <div class="g-canvas" style="width:${tableW + L.width}px">
+      <div class="g-canvas" style="width:${effW + L.width}px">
         <div class="g-headrow">
           <div class="g-corner">
-            <div class="g-cols"><div>N°</div><div>Tâche</div><div style="text-align:right">Durée</div><div>Lieu</div><div>Début</div><div>Fin</div><div style="text-align:right">%</div><div></div></div>
-            <div class="g-splitter" title="Glisser pour élargir le tableau"></div>
+            <div class="g-cols" aria-hidden="true"><div>N°</div><div>Tâche</div><div style="text-align:right">Durée</div><div>Lieu</div><div>Début</div><div>Fin</div><div style="text-align:right">%</div><div title="État"></div></div>
+            <div class="g-splitter" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Largeur du tableau (flèches gauche et droite)" aria-valuemin="280" aria-valuemax="1000" aria-valuenow="${effW}" title="Glisser pour élargir le tableau"></div>
           </div>
-          <svg class="g-svg-head" width="${L.width}" height="${HEAD_H}">${headerSVG(L, sched.resolver)}</svg>
+          <svg class="g-svg-head" width="${L.width}" height="${HEAD_H}" aria-hidden="true" focusable="false">${headerSVG(L, sched.resolver)}</svg>
         </div>
         <div class="g-bodyrow">
-          <div class="g-table" style="min-height:${body.height}px">
+          <div class="g-table" style="min-height:${body.height}px" role="region" aria-label="Tâches du projet" aria-describedby="gantt-help">
             ${rows.map((r) => rowHTML(r, sched, half)).join('')}
-            <button class="g-add-row" type="button" data-action="add-task">${icon('plus', 16)} Ajouter une tâche</button>
+            <button class="g-add-row" type="button" data-action="add-task">${icon('plus', 16)} Nouvelle tâche</button>
           </div>
-          <svg class="g-svg-body" width="${L.width}" height="${body.height}">${body.svg}</svg>
+          <svg class="g-svg-body" width="${L.width}" height="${body.height}" aria-hidden="true" focusable="false">${body.svg}</svg>
         </div>
       </div>
     </div>`;
@@ -160,18 +171,19 @@ function renderGantt() {
 }
 
 function renderEmpty() {
-  emptyEl.innerHTML = `<div class="empty-card">
-    <div class="empty-illu"><span style="width:45%"></span><span style="width:70%;margin-left:25%"></span><span style="width:40%;margin-left:55%"></span></div>
-    <h2>Planifiez votre projet en quelques minutes</h2>
-    <p>① Réglez le <b>calendrier</b> de la classe (jours d’école, d’entreprise, vacances).<br>
-       ② Ajoutez vos <b>tâches</b> avec leur durée en jours de présence.<br>
-       ③ <b>Enregistrez</b> votre fichier .json et suivez l’avancement.</p>
+  emptyEl.innerHTML = `<section class="empty-card" aria-labelledby="empty-title">
+    <h2 id="empty-title">Aucune tâche pour l’instant</h2>
+    <ol>
+      <li>Réglez le <b>calendrier</b> de la classe : jours d’école, d’entreprise, vacances.</li>
+      <li>Ajoutez les <b>tâches</b>, avec leur durée en jours de présence.</li>
+      <li><b>Enregistrez</b> le fichier .json, puis mettez à jour l’avancement au fil du projet.</li>
+    </ol>
     <div class="actions">
-      <button class="btn btn-primary" type="button" data-action="add-task">${icon('plus')} Première tâche</button>
-      <button class="btn" type="button" data-action="calendar">${icon('calendar')} Calendrier</button>
+      <button class="btn btn-primary" type="button" data-action="add-task">${icon('plus')} Nouvelle tâche</button>
+      <button class="btn" type="button" data-action="calendar">${icon('calendar')} Régler le calendrier</button>
       <button class="btn" type="button" data-action="open">${icon('folder')} Ouvrir un fichier</button>
-      <button class="btn" type="button" data-action="example">${icon('sparkles')} Voir un exemple</button>
-    </div></div>`;
+      <button class="btn" type="button" data-action="example">${icon('file')} Voir l’exemple</button>
+    </div></section>`;
 }
 
 function renderStatus() {
@@ -180,30 +192,30 @@ function renderStatus() {
   const late = [...s.items.values()].filter((i) => !i.summary && i.status === 'late').length;
   const leaves = [...s.items.values()].filter((i) => !i.summary).length;
   const hasBase = !!store.project.baseline && store.project.view.showBaseline !== false;
-  const links = `<span class="sb-links"><a href="${esc(config.legalUrl)}" target="_blank">Mentions légales</a><a href="${esc(config.sourceUrl)}" target="_blank" rel="noopener" title="K-Gantt est un logiciel libre (AGPL-3.0)">Code source</a></span>`;
+  const links = `<span class="sb-links"><a href="${esc(config.legalUrl)}" target="_blank">Mentions légales<span class="sr-only"> (nouvel onglet)</span></a><a href="${esc(config.sourceUrl)}" target="_blank" rel="noopener">Code source (AGPL)<span class="sr-only"> (nouvel onglet)</span></a></span>`;
+  const legend = `<span class="legend" aria-label="Légende du diagramme"><span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span>`;
   document.getElementById('statusbar').innerHTML = tasks.length ? `
-    <span class="sb-progress">Avancement <span class="meter" title="Réalisé ${s.progress} % — attendu aujourd’hui ${s.expected} %"><i style="width:${s.progress}%"></i><em style="left:calc(${s.expected}% - 1px)"></em></span>
-      <b>${s.progress} %</b><span>attendu ${s.expected} %</span></span>
+    <span class="sb-progress">Avancement <span class="meter" aria-hidden="true" title="Réalisé ${s.progress} %, attendu aujourd’hui ${s.expected} % (trait vertical)"><i style="width:${s.progress}%"></i><em style="left:calc(${s.expected}% - 1px)"></em></span>
+      <b>${s.progress} %</b><span>(attendu ${s.expected} %)</span></span>
     <span>Du <b>${formatFR(dayOfSlot(s.start))}</b> au <b>${formatFR(dayOfSlot(s.end))}</b></span>
-    <span><b>${leaves}</b> tâche${leaves > 1 ? 's' : ''}${late ? ` · <b style="color:var(--danger)">${late} en retard</b>` : ''}</span>
-    <span class="legend">
-      <span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span>
-      <span><i class="sw sw-today"></i>Aujourd’hui</span>${hasBase ? '<span><i class="sw sw-baseline"></i>Prévu</span>' : ''}
-    </span>${links}` : `<span>Aucune tâche pour le moment.</span><span class="legend"><span><i class="sw sw-school"></i>École</span><span><i class="sw sw-company"></i>Entreprise</span><span><i class="sw sw-off"></i>Libre</span></span>${links}`;
+    <span><b>${leaves}</b> tâche${leaves > 1 ? 's' : ''}${late ? ` · <b class="st-late">${late} en retard</b>` : ''}</span>
+    ${legend}<span><i class="sw sw-today"></i>Aujourd’hui</span>${hasBase ? '<span><i class="sw sw-baseline"></i>Prévu</span>' : ''}</span>${links}` : `<span>Aucune tâche.</span>${legend}</span>${links}`;
 }
 
 function captureFocus() {
   const a = document.activeElement;
   const row = a?.closest?.('.g-row');
-  if (!row || !a.dataset.f) return null;
+  if (!row) return null;
+  const key = a.dataset.f ? `[data-f="${a.dataset.f}"]` : a.matches('[data-toggle]') ? '[data-toggle]' : a.dataset.open ? `[data-open="${a.dataset.open}"]` : null;
+  if (!key) return null;
   let sel = null;
   try { sel = [a.selectionStart, a.selectionEnd]; } catch { /* */ }
-  return { id: row.dataset.id, f: a.dataset.f, sel };
+  return { id: row.dataset.id, key, sel };
 }
 
 function restoreFocus(f) {
   if (!f) return;
-  const el = ganttEl.querySelector(`.g-row[data-id="${CSS.escape(f.id)}"] [data-f="${f.f}"]`);
+  const el = ganttEl.querySelector(`.g-row[data-id="${CSS.escape(f.id)}"] ${f.key}`);
   if (!el) return;
   el.focus({ preventScroll: true });
   if (f.sel && f.sel[0] != null) { try { el.setSelectionRange(f.sel[0], f.sel[1]); } catch { /* */ } }
@@ -218,7 +230,11 @@ function selectedTask() {
 function select(id, { scroll = true } = {}) {
   if (!store.project.tasks.some((t) => t.id === id)) id = null;
   selectedId = id;
-  ganttEl.querySelectorAll('.g-row').forEach((r) => r.classList.toggle('is-selected', r.dataset.id === id));
+  ganttEl.querySelectorAll('.g-row').forEach((r) => {
+    const on = r.dataset.id === id;
+    r.classList.toggle('is-selected', on);
+    if (on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current');
+  });
   const row = layout?.rows.find((r) => r.task.id === id);
   const rect = ganttEl.querySelector('#g-sel');
   if (rect) rect.setAttribute('y', row ? row.y : -1000);
@@ -445,14 +461,28 @@ function toggleTheme() {
 
 // --- Évènements : barre d'outils et menus ------------------------------------------
 
+function setMenu(menu, open, { focus = null } = {}) {
+  menu.classList.toggle('is-open', open);
+  const toggle = menu.querySelector('[data-menu-toggle]');
+  toggle.setAttribute('aria-expanded', String(open));
+  if (open && focus) {
+    const items = [...menu.querySelectorAll('.menu-list button:not(:disabled)')];
+    (focus === 'last' ? items[items.length - 1] : items[0])?.focus();
+  }
+  if (!open && focus === 'toggle') toggle.focus();
+}
+const closeMenus = (except = null) => document.querySelectorAll('.menu.is-open').forEach((m) => { if (m !== except) setMenu(m, false); });
+
 document.addEventListener('click', (e) => {
   const toggle = e.target.closest('[data-menu-toggle]');
-  document.querySelectorAll('.menu.is-open').forEach((m) => { if (!m.contains(toggle)) m.classList.remove('is-open'); });
-  if (toggle) { toggle.closest('[data-menu]').classList.toggle('is-open'); return; }
+  const menu = toggle?.closest('[data-menu]');
+  closeMenus(menu);
+  if (toggle) { setMenu(menu, !menu.classList.contains('is-open')); return; }
 
   const a = e.target.closest('[data-action]');
   if (a && !a.disabled && actions[a.dataset.action]) {
-    a.closest('.menu')?.classList.remove('is-open');
+    const m = a.closest('.menu');
+    if (m) setMenu(m, false, { focus: 'toggle' });
     actions[a.dataset.action]();
     return;
   }
@@ -460,6 +490,21 @@ document.addEventListener('click', (e) => {
   if (z) store.setView({ zoom: z.dataset.zoom });
 });
 document.getElementById('project-title').addEventListener('click', () => openProjectDialog());
+
+// Clavier dans les menus : flèches, Début / Fin, Échap ; fermeture quand le focus quitte le menu.
+document.querySelectorAll('[data-menu]').forEach((menu) => {
+  menu.addEventListener('keydown', (e) => {
+    const items = [...menu.querySelectorAll('.menu-list button:not(:disabled)')];
+    const i = items.indexOf(document.activeElement);
+    const onToggle = e.target.closest('[data-menu-toggle]');
+    if (e.key === 'Escape' && menu.classList.contains('is-open')) { e.preventDefault(); e.stopPropagation(); setMenu(menu, false, { focus: 'toggle' }); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); if (onToggle) setMenu(menu, true, { focus: 'first' }); else items[(i + 1) % items.length]?.focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); if (onToggle) setMenu(menu, true, { focus: 'last' }); else items[(i - 1 + items.length) % items.length]?.focus(); }
+    else if (e.key === 'Home' && !onToggle) { e.preventDefault(); items[0]?.focus(); }
+    else if (e.key === 'End' && !onToggle) { e.preventDefault(); items[items.length - 1]?.focus(); }
+  });
+  menu.addEventListener('focusout', (e) => { if (!menu.contains(e.relatedTarget)) setMenu(menu, false); });
+});
 
 // --- Évènements : tableau -------------------------------------------------------------
 
@@ -470,17 +515,25 @@ function commitField(id, field, raw) {
     if (!t) return false;
     if (field === 'name') {
       const v = String(raw).trim();
-      if (!v) return false;
+      if (!v) { toast('Le nom de la tâche ne peut pas être vide : l’ancien nom a été conservé.', { error: true }); return false; }
       t.name = v;
     } else if (field === 'duration') {
       const n = parseFloat(String(raw).replace(',', '.'));
-      if (!Number.isFinite(n)) return false;
+      if (!Number.isFinite(n) || n <= 0) {
+        toast(`Durée invalide : indiquez un nombre de jours supérieur à 0${half ? ' (par demi-journée, ex. 1,5)' : ' (ex. 3)'}.`, { error: true });
+        return false;
+      }
       const step = half ? 2 : 1;
       t.duration = Math.max(1 / step, Math.round(n * step) / step);
     } else if (field === 'where') {
       t.where = WHERE[raw] ? raw : 'school';
     } else if (field === 'progress') {
-      const v = Math.max(0, Math.min(100, Math.round(+raw || 0)));
+      const num = Number(String(raw).replace(',', '.'));
+      if (String(raw).trim() === '' || !Number.isFinite(num) || num < 0 || num > 100) {
+        toast('Avancement invalide : indiquez un pourcentage entre 0 et 100.', { error: true });
+        return false;
+      }
+      const v = Math.round(num);
       if (v === t.progress) return false;
       t.progress = v;
       logProgress(t, v);
@@ -540,7 +593,9 @@ ganttEl.addEventListener('click', (e) => {
   if (!row) return;
   const id = row.dataset.id;
   if (e.target.closest('[data-toggle]')) {
+    const keep = captureFocus();
     store.update((p) => { const t = p.tasks.find((x) => x.id === id); t.collapsed = !t.collapsed; }, { history: false });
+    restoreFocus(keep);
     return;
   }
   select(id, { scroll: false });
@@ -554,22 +609,30 @@ ganttEl.addEventListener('dblclick', (e) => {
   if (g) openTaskDialog(g.dataset.id);
 });
 
-// Élargir / réduire le tableau
+// Élargir / réduire le tableau (souris ou flèches du clavier sur le séparateur)
+function setTableWidth(w) {
+  tableW = Math.max(280, Math.min(1000, Math.round(w)));
+  ganttEl.style.setProperty('--table-w', `${tableW}px`);
+  ganttEl.querySelector('.g-canvas').style.width = `${tableW + layout.width}px`;
+  ganttEl.querySelector('.g-splitter')?.setAttribute('aria-valuenow', String(tableW));
+  try { localStorage.setItem('kgantt:tableW', String(tableW)); } catch { /* */ }
+}
+ganttEl.addEventListener('keydown', (e) => {
+  if (!e.target.matches('.g-splitter')) return;
+  const step = e.shiftKey ? 80 : 20;
+  const map = { ArrowLeft: tableW - step, ArrowRight: tableW + step, Home: 280, End: 1000 };
+  if (e.key in map) { e.preventDefault(); setTableWidth(map[e.key]); }
+});
 ganttEl.addEventListener('pointerdown', (e) => {
   const sp = e.target.closest('.g-splitter');
   if (!sp) return;
   e.preventDefault();
   sp.classList.add('is-active');
   const x0 = e.clientX, w0 = tableW;
-  const move = (ev) => {
-    tableW = Math.max(280, Math.min(1000, w0 + ev.clientX - x0));
-    ganttEl.style.setProperty('--table-w', `${tableW}px`);
-    ganttEl.querySelector('.g-canvas').style.width = `${tableW + layout.width}px`;
-  };
+  const move = (ev) => setTableWidth(w0 + ev.clientX - x0);
   const up = () => {
     window.removeEventListener('pointermove', move);
     sp.classList.remove('is-active');
-    try { localStorage.setItem('kgantt:tableW', String(tableW)); } catch { /* */ }
   };
   window.addEventListener('pointermove', move);
   window.addEventListener('pointerup', up, { once: true });
@@ -725,7 +788,7 @@ ganttEl.addEventListener('click', async (e) => {
 // --- Clavier ---------------------------------------------------------------------------
 
 document.addEventListener('keydown', (e) => {
-  if (document.querySelector('dialog[open]')) return;
+  if (document.querySelector('dialog[open]') || e.defaultPrevented) return;
   const mod = e.ctrlKey || e.metaKey;
   const editing = e.target.closest?.('input, select, textarea');
 
@@ -745,11 +808,13 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (editing) return;
+  if (e.key === 'Insert' || (mod && e.key === 'Enter')) { e.preventDefault(); addTask('task'); return; }
+  // Sur un bouton ou un lien, Entrée / flèches / Suppr gardent leur comportement normal.
+  if (e.target.closest?.('button, a, [role="separator"], [tabindex]:not([tabindex="-1"])')) return;
 
   const ids = layout?.rows.map((r) => r.task.id) || [];
   const i = ids.indexOf(selectedId);
-  if (e.key === 'Insert' || (mod && e.key === 'Enter')) { e.preventDefault(); addTask('task'); }
-  else if (e.key === 'Delete' && selectedId) { e.preventDefault(); actions.delete(); }
+  if (e.key === 'Delete' && selectedId) { e.preventDefault(); actions.delete(); }
   else if (e.key === 'Enter' && selectedId) { e.preventDefault(); openTaskDialog(selectedId); }
   else if (e.key === 'F2' && selectedId) { e.preventDefault(); focusName(selectedId, true); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); select(ids[Math.min(ids.length - 1, i + 1)] ?? ids[0]); }

@@ -57,7 +57,7 @@ Dans le diagramme, les barres montrent les jours réellement travaillés : une t
   - **iCal (.ics)** : un évènement par période travaillée (seuls les jours où la tâche avance) ou un évènement par tâche.
 - **Import GanttProject (.gan)** : tâches, sous-tâches, jalons, liens, avancement, notes, couleurs, ressources et affectations, jours fériés datés. On choisit le calendrier (temps plein ou alternance), le lieu des tâches, et on peut conserver les dates d'origine.
 - **Synchronisation avec un agenda** (Google Agenda, Outlook, Apple Calendrier) par abonnement iCal, voir ci-dessous
-- Thème clair et **mode sombre**
+- Thème clair et **mode sombre**, interface **accessible** (WCAG 2.1 AA, navigation complète au clavier) : voir [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md)
 
 ### Synchronisation iCal (abonnement)
 

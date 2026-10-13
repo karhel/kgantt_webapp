@@ -108,12 +108,12 @@
     {
       "id": "lea",
       "name": "Léa",
-      "color": "#4f46e5"
+      "color": "#c2410c"
     },
     {
       "id": "tom",
       "name": "Tom",
-      "color": "#059669"
+      "color": "#0f766e"
     },
     {
       "id": "ines",
@@ -233,7 +233,7 @@
       "resources": [
         "tom"
       ],
-      "color": "#0891b2",
+      "color": "#1d4ed8",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -253,7 +253,7 @@
       "resources": [
         "ines"
       ],
-      "color": "#0891b2",
+      "color": "#1d4ed8",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -290,7 +290,7 @@
         "tom",
         "lea"
       ],
-      "color": "#059669",
+      "color": "#0f766e",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -310,7 +310,7 @@
       "resources": [
         "ines"
       ],
-      "color": "#059669",
+      "color": "#0f766e",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -331,7 +331,7 @@
       "resources": [
         "lea"
       ],
-      "color": "#d97706",
+      "color": "#854d0e",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -408,7 +408,7 @@
       ],
       "progress": 0,
       "resources": [],
-      "color": "#dc2626",
+      "color": "#7e22ce",
       "notes": "",
       "collapsed": false,
       "log": []
@@ -514,7 +514,7 @@
     "showBaseline": true
   },
   "computed": {
-    "generatedAt": "2026-10-13T16:15:43.691Z",
+    "generatedAt": "2026-10-13T19:16:21.550Z",
     "progress": 25,
     "tasks": {
       "g1": {

@@ -10,13 +10,17 @@ export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
  * @param {{ title: string, body: string, foot?: string, wide?: boolean, onMount?: Function }} opts
  * @returns {{ dialog: HTMLDialogElement, close: Function, $: Function, $$: Function, done: Promise }}
  */
+let modalCount = 0;
+
 export function openModal({ title, body, foot = '', wide = false, onMount, onClose }) {
   const dlg = document.createElement('dialog');
+  const titleId = `dlg-title-${++modalCount}`;
   dlg.className = `modal${wide ? ' wide' : ''}`;
+  dlg.setAttribute('aria-labelledby', titleId);
   dlg.innerHTML = `
     <form method="dialog" class="modal-head">
-      <h2>${esc(title)}</h2>
-      <button class="btn btn-icon btn-ghost" value="cancel" title="Fermer (Échap)">${icon('x')}</button>
+      <h2 id="${titleId}">${esc(title)}</h2>
+      <button class="btn btn-icon btn-ghost" value="cancel" aria-label="Fermer" title="Fermer (Échap)">${icon('x')}</button>
     </form>
     <div class="modal-body">${body}</div>
     ${foot ? `<div class="modal-foot">${foot}</div>` : ''}`;
@@ -68,9 +72,12 @@ export function toast(message, { error = false, timeout = 3800 } = {}) {
   const box = document.getElementById('toasts');
   const t = document.createElement('div');
   t.className = `toast${error ? ' is-error' : ''}`;
+  // Les erreurs sont annoncées immédiatement par les lecteurs d'écran.
+  if (error) t.setAttribute('role', 'alert');
   t.textContent = message;
   box.appendChild(t);
-  setTimeout(() => t.remove(), timeout);
+  // Laisse le temps de lire : plus long pour les erreurs et les messages longs.
+  setTimeout(() => t.remove(), Math.max(timeout, error ? 8000 : 0, message.length * 70));
 }
 
 /** Déclenche le téléchargement d'un Blob. */

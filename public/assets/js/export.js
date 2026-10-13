@@ -61,10 +61,11 @@ export function buildExportSVG(project, sched, { zoom = 'week', showBaseline = t
   out.push(`<rect width="${W}" height="${H}" fill="#ffffff"/>`);
 
   // Titre
-  out.push(`<rect x="16" y="18" width="34" height="34" rx="9" fill="#4f46e5"/><text x="33" y="42" text-anchor="middle" style="fill:#fff;font-size:19px;font-weight:800">K</text>`);
+  // Marque K-Gantt : trois barres de Gantt, sans dégradé
+  out.push(`<g transform="translate(18 22)" fill="#c2410c"><rect x="0" y="0" width="15" height="6" rx="1"/><rect x="7" y="9" width="20" height="6" rx="1"/><rect x="3" y="18" width="11" height="6" rx="1"/></g>`);
   out.push(`<text class="g-title" x="62" y="34">${esc(P.name)}</text>`);
   out.push(`<text class="g-subtitle" x="62" y="54">${esc([sub, range].filter(Boolean).join('  •  '))}</text>`);
-  out.push(`<text class="g-subtitle" x="${W - 16}" y="34" text-anchor="end">Avancement : <tspan style="font-weight:700;fill:#0f172a">${sched.progress} %</tspan> (attendu ${sched.expected} %)</text>`);
+  out.push(`<text class="g-subtitle" x="${W - 16}" y="34" text-anchor="end">Avancement : <tspan style="font-weight:700;fill:#1c1917">${sched.progress} %</tspan> (attendu ${sched.expected} %)</text>`);
   out.push(`<text class="g-subtitle" x="${W - 16}" y="54" text-anchor="end">Exporté le ${formatFR(today())} avec K-Gantt</text>`);
 
   // Tableau
@@ -104,29 +105,29 @@ export function buildExportSVG(project, sched, { zoom = 'week', showBaseline = t
     }
     out.push(`<line class="g-grid-soft" x1="0" y1="${HEAD_H + row.y + ROW_H - 0.5}" x2="${tableW}" y2="${HEAD_H + row.y + ROW_H - 0.5}"/>`);
   }
-  out.push(`<line x1="${tableW - 0.5}" y1="0" x2="${tableW - 0.5}" y2="${HEAD_H + bodyH}" stroke="#cbd5e1"/>`);
+  out.push(`<line x1="${tableW - 0.5}" y1="0" x2="${tableW - 0.5}" y2="${HEAD_H + bodyH}" stroke="#8f877e"/>`);
   out.push('</g>');
 
   // Diagramme
   out.push(`<g transform="translate(${tableW} ${top})">${headerSVG(L, sched.resolver)}</g>`);
   const body = bodySVG(project, sched, L, { interactive: false, showBaseline, minHeight: bodyH });
   out.push(`<g transform="translate(${tableW} ${top + HEAD_H})">${body.svg}</g>`);
-  out.push(`<rect x="0.5" y="${top + 0.5}" width="${W - 1}" height="${HEAD_H + bodyH - 1}" fill="none" stroke="#e2e8f0"/>`);
+  out.push(`<rect x="0.5" y="${top + 0.5}" width="${W - 1}" height="${HEAD_H + bodyH - 1}" fill="none" stroke="#e2dfda"/>`);
 
   // Légende
   const ly = top + HEAD_H + bodyH + 22;
   const leg = [
-    ['#ffffff', 'École'], ['#fef3c7', 'Entreprise'], ['#f1f5f9', 'Libre / vacances'],
+    ['#ffffff', 'École'], ['url(#kg-hatch)', 'Entreprise (hachuré)'], ['#e9e7e3', 'Libre / vacances'],
   ];
   let lx = 16;
   for (const [c, label] of leg) {
-    out.push(`<rect x="${lx}" y="${ly - 11}" width="14" height="14" rx="3" fill="${c}" stroke="#cbd5e1"/><text class="g-subtitle" x="${lx + 20}" y="${ly}">${label}</text>`);
+    out.push(`<rect x="${lx}" y="${ly - 11}" width="14" height="14" rx="3" fill="${c}" stroke="#8f877e"/><text class="g-subtitle" x="${lx + 20}" y="${ly}">${label}</text>`);
     lx += 40 + label.length * 7;
   }
-  out.push(`<line x1="${lx}" y1="${ly - 12}" x2="${lx}" y2="${ly + 3}" stroke="#e11d48" stroke-width="2" stroke-dasharray="3 2"/><text class="g-subtitle" x="${lx + 8}" y="${ly}">Aujourd’hui</text>`);
+  out.push(`<line x1="${lx}" y1="${ly - 12}" x2="${lx}" y2="${ly + 3}" stroke="#b91c1c" stroke-width="2" stroke-dasharray="3 2"/><text class="g-subtitle" x="${lx + 8}" y="${ly}">Aujourd’hui</text>`);
   lx += 100;
   if (project.baseline && showBaseline) {
-    out.push(`<rect x="${lx}" y="${ly - 6}" width="22" height="4" rx="2" fill="#94a3b8"/><text class="g-subtitle" x="${lx + 28}" y="${ly}">Prévu (référence du ${formatFR(toDay(project.baseline.date))})</text>`);
+    out.push(`<rect x="${lx}" y="${ly - 6}" width="22" height="4" rx="2" fill="#8f877e"/><text class="g-subtitle" x="${lx + 28}" y="${ly}">Prévu (référence du ${formatFR(toDay(project.baseline.date))})</text>`);
   }
   out.push('</svg>');
   return { svg: out.join(''), width: W, height: H };

@@ -2,7 +2,7 @@
 // Fenêtres : tâche, projet, ressources, nouveau projet, export, aide.
 
 import { store } from './store.js';
-import { PALETTE, flatten, wouldCreateCycle, hasChildren, uid, defaultProject, removeTask } from './project.js';
+import { PALETTE, PALETTE_NAMES, flatten, wouldCreateCycle, hasChildren, uid, defaultProject, removeTask } from './project.js';
 import { WHERE, normalizeCalendar, defaultCalendar } from './calendar.js';
 import { slotLabel, parseSlot, formatSlot, toISO, toDay, today, formatFR, dayOfSlot } from './dates.js';
 import { STATUS_LABELS } from './scheduler.js';
@@ -41,13 +41,13 @@ export function openTaskDialog(taskId) {
 
   const depRows = rows.filter((r) => r.task.id !== t.id).map((r) => {
     const blocked = !t.deps.includes(r.task.id) && wouldCreateCycle(project, r.task.id, t.id);
-    return `<label class="${blocked ? 'is-disabled' : ''}" title="${blocked ? 'Lien impossible (boucle ou tâche parente / enfant)' : ''}">
+    return `<label class="${blocked ? 'is-disabled' : ''}">
       <input type="checkbox" value="${esc(r.task.id)}" ${t.deps.includes(r.task.id) ? 'checked' : ''} ${blocked ? 'disabled' : ''}>
-      <span class="wbs">${r.wbs}</span><span style="padding-left:${r.depth * 12}px">${esc(r.task.name)}</span></label>`;
+      <span class="wbs">${r.wbs}</span><span style="padding-left:${r.depth * 12}px">${esc(r.task.name)}${blocked ? ' <span class="muted">(impossible : boucle ou groupe)</span>' : ''}</span></label>`;
   }).join('') || '<p class="muted" style="margin:6px">Aucune autre tâche.</p>';
 
   const resChips = project.resources.map((r) => `<label class="chip"><input type="checkbox" value="${esc(r.id)}" ${t.resources.includes(r.id) ? 'checked' : ''}><i style="background:${esc(r.color)}"></i>${esc(r.name)}</label>`).join('')
-    || '<span class="muted">Aucune ressource. Ajoutez les membres de l’équipe avec le bouton « Ressources ».</span>';
+    || '<span class="muted">Personne pour l’instant. Ajoutez les membres avec le bouton « Équipe ».</span>';
 
   const nb = parseSlot(t.notBefore);
   const whereCards = Object.entries(WHERE).map(([k, w]) => `<label><input type="radio" name="where" value="${k}" ${t.where === k ? 'checked' : ''}><span>${w.label}</span><small>${k === 'school' ? 'compte les jours de cours' : k === 'company' ? 'compte les jours en entreprise' : 'école et entreprise'}</small></label>`).join('');
@@ -66,38 +66,40 @@ export function openTaskDialog(taskId) {
           ${it.error ? `<span class="g-err">⚠ ${esc(it.error)}</span>` : ''}
         </div>
         ${isSummary ? '<p class="full muted" style="margin:0">Les dates, la durée et l’avancement d’un groupe sont calculés à partir de ses sous-tâches.</p>' : `
-        <div class="field full"><span class="label">Type</span>
+        <fieldset class="field full"><legend>Type</legend>
           <div class="radio-cards two">
             <label><input type="radio" name="type" value="task" ${t.type !== 'milestone' ? 'checked' : ''}><span>Tâche</span><small>un travail qui dure</small></label>
             <label><input type="radio" name="type" value="milestone" ${t.type === 'milestone' ? 'checked' : ''}><span>Jalon</span><small>une échéance : rendu, soutenance…</small></label>
           </div>
-        </div>
+        </fieldset>
         <div class="field" data-for="task"><label for="t-duration">Durée (jours de présence)</label>
-          <input type="number" id="t-duration" min="${half ? 0.5 : 1}" step="${half ? 0.5 : 1}" value="${t.duration}">
-          <span class="hint">Seuls les jours correspondant au lieu sont comptés.</span></div>
+          <input type="number" id="t-duration" min="${half ? 0.5 : 1}" step="${half ? 0.5 : 1}" value="${t.duration}" aria-describedby="t-duration-hint">
+          <span class="hint" id="t-duration-hint">Seuls les jours correspondant au lieu sont comptés.</span></div>
         <div class="field"><label for="t-nb">Ne pas commencer avant</label>
           <div class="inline">
-            <input type="date" id="t-nb" value="${nb != null ? toISO(dayOfSlot(nb)) : ''}">
-            ${half ? `<select id="t-nb-half" style="flex:none;width:110px"><option value="0">matin</option><option value="1" ${nb != null && nb % 2 ? 'selected' : ''}>après-midi</option></select>` : ''}
-            <button class="btn btn-icon btn-ghost" type="button" id="t-nb-clear" title="Effacer">${icon('x', 16)}</button>
+            <input type="date" id="t-nb" value="${nb != null ? toISO(dayOfSlot(nb)) : ''}" aria-describedby="t-nb-hint">
+            ${half ? `<select id="t-nb-half" aria-label="Demi-journée" style="flex:none;width:120px"><option value="0">matin</option><option value="1" ${nb != null && nb % 2 ? 'selected' : ''}>après-midi</option></select>` : ''}
+            <button class="btn btn-icon btn-ghost" type="button" id="t-nb-clear" aria-label="Effacer la date" title="Effacer la date">${icon('x', 16)}</button>
           </div>
-          <span class="hint">Sinon, la tâche démarre dès que possible.</span></div>
-        <div class="field full" data-for="task"><span class="label">Où se fait cette tâche ?</span><div class="radio-cards">${whereCards}</div></div>
-        <div class="section-title">Avancement</div>
+          <span class="hint" id="t-nb-hint">Laissez vide pour démarrer dès que possible.</span></div>
+        <fieldset class="field full" data-for="task"><legend>Où se fait cette tâche ?</legend><div class="radio-cards">${whereCards}</div></fieldset>
+        <h3 class="section-title">Avancement</h3>
         <div class="field full">
+          <label for="t-progress">Pourcentage réalisé</label>
           <div class="progress-input">
-            <input type="range" id="t-progress-range" min="0" max="100" step="5" value="${t.progress}">
-            <input type="number" id="t-progress" min="0" max="100" step="5" value="${t.progress}"><span>%</span>
+            <input type="range" id="t-progress-range" min="0" max="100" step="5" value="${t.progress}" aria-label="Pourcentage réalisé (curseur)">
+            <input type="number" id="t-progress" min="0" max="100" step="5" value="${t.progress}"><span aria-hidden="true">%</span>
           </div>
-          <input type="text" id="t-log-note" placeholder="Note pour le journal de bord (facultatif) : ce qui a été fait, difficultés…" style="height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);margin-top:6px">
         </div>
-        <div class="field full"><span class="label">Journal d’avancement</span><ul class="log-list" id="t-log"></ul></div>`}
-        <div class="section-title">Organisation</div>
-        <div class="field full"><span class="label">Ressources (qui fait la tâche ?)</span><div class="chips" id="t-res">${resChips}</div></div>
-        <div class="field full"><span class="label">Doit attendre la fin de…</span><div class="dep-list" id="t-deps">${depRows}</div></div>
-        <div class="field full"><span class="label">Couleur</span><div class="swatches" id="t-color">
-          ${PALETTE.map((c) => `<button type="button" style="background:${c}" data-color="${c}" class="${(t.color || PALETTE[0]) === c ? 'is-active' : ''}" title="${c}"></button>`).join('')}
-        </div></div>
+        <div class="field full"><label for="t-log-note">Note pour le journal de bord <span class="muted">(facultatif)</span></label>
+          <input type="text" id="t-log-note" placeholder="Ce qui a été fait, difficultés…"></div>
+        <div class="field full"><span class="label" id="t-log-title">Journal d’avancement</span><ul class="log-list" id="t-log" aria-labelledby="t-log-title"></ul></div>`}
+        <h3 class="section-title">Organisation</h3>
+        <fieldset class="field full"><legend>Qui fait la tâche ?</legend><div class="chips" id="t-res">${resChips}</div></fieldset>
+        <fieldset class="field full"><legend>Doit attendre la fin de…</legend><div class="dep-list" id="t-deps" tabindex="0" role="group" aria-label="Tâches à attendre">${depRows}</div></fieldset>
+        <fieldset class="field full"><legend>Couleur de la barre</legend><div class="swatches" id="t-color">
+          ${PALETTE.map((c, i) => { const on = (t.color || PALETTE[0]) === c; return `<button type="button" style="background:${c}" data-color="${c}" aria-pressed="${on}" aria-label="${PALETTE_NAMES[i]}" title="${PALETTE_NAMES[i]}">${on ? icon('check', 16) : ''}</button>`; }).join('')}
+        </div></fieldset>
         <div class="field full"><label for="t-notes">Notes</label><textarea id="t-notes" rows="3">${esc(t.notes)}</textarea></div>
       </div>`,
     foot: `<button class="btn btn-danger" type="button" id="t-delete">${icon('trash')} Supprimer</button>
@@ -112,7 +114,7 @@ export function openTaskDialog(taskId) {
     if (!ul) return;
     ul.innerHTML = t.log.length ? [...t.log].map((e, i) => ({ e, i })).reverse().map(({ e, i }) =>
       `<li><span>${formatFR(toDay(e.date))}</span><b>${e.progress} %</b><span class="${e.note ? '' : 'muted'}">${esc(e.note || '—')}</span>
-       <button type="button" data-log-del="${i}" title="Supprimer l’entrée">${icon('x', 14)}</button></li>`).join('')
+       <button type="button" data-log-del="${i}" aria-label="Supprimer l’entrée du ${formatFR(toDay(e.date))}" title="Supprimer l’entrée">${icon('x', 14)}</button></li>`).join('')
       : '<li><span class="muted" style="grid-column:1/-1">Pas encore d’entrée. Chaque mise à jour de l’avancement est datée ici.</span></li>';
   };
   renderLog();
@@ -131,7 +133,10 @@ export function openTaskDialog(taskId) {
   $('#t-color').addEventListener('click', (e) => {
     const b = e.target.closest('[data-color]');
     if (!b) return;
-    $$('#t-color button').forEach((x) => x.classList.toggle('is-active', x === b));
+    $$('#t-color button').forEach((x) => {
+      x.setAttribute('aria-pressed', String(x === b));
+      x.innerHTML = x === b ? icon('check', 16) : '';
+    });
   });
   $('#t-log')?.addEventListener('click', (e) => {
     const b = e.target.closest('[data-log-del]');
@@ -147,7 +152,7 @@ export function openTaskDialog(taskId) {
     const name = $('#t-name').value.trim() || 'Sans nom';
     const deps = $$('#t-deps input:checked').map((i) => i.value);
     const resources = $$('#t-res input:checked').map((i) => i.value);
-    const color = $('#t-color .is-active')?.dataset.color || null;
+    const color = $('#t-color [aria-pressed="true"]')?.dataset.color || null;
     store.update((p) => {
       const task = p.tasks.find((x) => x.id === t.id);
       if (!task) return false;
@@ -277,20 +282,20 @@ export function openResourcesDialog() {
   const used = (id) => project.tasks.filter((t) => t.resources.includes(id)).length;
 
   const m = openModal({
-    title: 'Ressources (membres de l’équipe)',
-    body: `<p class="muted" style="margin:0 0 12px">Ajoutez les personnes de l’équipe pour indiquer qui réalise chaque tâche.</p>
-      <table class="list-table"><thead><tr><th style="width:52px">Couleur</th><th>Nom</th><th style="width:90px">Tâches</th><th style="width:44px"></th></tr></thead><tbody id="r-list"></tbody></table>
+    title: 'Équipe du projet',
+    body: `<p class="muted" style="margin:0 0 12px">Ajoutez les membres de l’équipe pour indiquer qui réalise chaque tâche.</p>
+      <table class="list-table"><thead><tr><th style="width:52px">Couleur</th><th>Nom</th><th style="width:90px">Tâches</th><th style="width:44px"><span class="sr-only">Actions</span></th></tr></thead><tbody id="r-list"></tbody></table>
       <button class="btn btn-sm" type="button" id="r-add" style="margin-top:10px">${icon('plus', 16)} Ajouter une personne</button>`,
     foot: `<span class="spacer"></span><button class="btn" type="button" data-close="cancel">Annuler</button>
       <button class="btn btn-primary" type="button" id="r-save">Enregistrer</button>`,
   });
   const render = () => {
     m.$('#r-list').innerHTML = list.map((r, i) => `<tr data-i="${i}">
-      <td><input type="color" value="${esc(r.color)}" data-f="color"></td>
-      <td><input type="text" value="${esc(r.name)}" data-f="name" placeholder="Prénom Nom"></td>
+      <td><input type="color" value="${esc(r.color)}" data-f="color" aria-label="Couleur de ${esc(r.name || `la personne ${i + 1}`)}"></td>
+      <td><input type="text" value="${esc(r.name)}" data-f="name" placeholder="Prénom Nom" aria-label="Nom de la personne ${i + 1}"></td>
       <td class="muted">${used(r.id)}</td>
-      <td><button class="btn btn-icon btn-ghost btn-sm" type="button" data-del="${i}" title="Supprimer">${icon('trash', 16)}</button></td></tr>`).join('')
-      || '<tr><td colspan="4" class="muted" style="padding:10px 6px">Aucune ressource pour le moment.</td></tr>';
+      <td><button class="btn btn-icon btn-ghost btn-sm" type="button" data-del="${i}" aria-label="Retirer ${esc(r.name || `la personne ${i + 1}`)}" title="Retirer">${icon('trash', 16)}</button></td></tr>`).join('')
+      || '<tr><td colspan="4" class="muted" style="padding:10px 6px">Personne pour l’instant.</td></tr>';
   };
   render();
   m.$('#r-add').addEventListener('click', () => {
@@ -326,11 +331,11 @@ export function openExportDialog(kind, onExport) {
     title: kind === 'pdf' ? 'Exporter en PDF' : 'Exporter en image PNG',
     body: `<div class="form-grid">
       ${kind === 'pdf' ? `
-      <div class="field"><span class="label">Format du papier (paysage)</span>
-        <div class="radio-cards two"><label><input type="radio" name="paper" value="a4" checked><span>A4</span></label><label><input type="radio" name="paper" value="a3"><span>A3</span></label></div></div>
-      <div class="field"><span class="label">Mise en page</span>
-        <div class="radio-cards two"><label><input type="radio" name="fit" value="page" checked><span>Une page</span><small>tout réduire</small></label><label><input type="radio" name="fit" value="pages"><span>Plusieurs pages</span><small>taille réelle</small></label></div></div>` : ''}
-      <div class="field full"><span class="label">Échelle de temps</span><div class="radio-cards">${zoomOpts}</div></div>
+      <fieldset class="field"><legend>Format du papier (paysage)</legend>
+        <div class="radio-cards two"><label><input type="radio" name="paper" value="a4" checked><span>A4</span></label><label><input type="radio" name="paper" value="a3"><span>A3</span></label></div></fieldset>
+      <fieldset class="field"><legend>Mise en page</legend>
+        <div class="radio-cards two"><label><input type="radio" name="fit" value="page" checked><span>Une page</span><small>tout réduire</small></label><label><input type="radio" name="fit" value="pages"><span>Plusieurs pages</span><small>taille réelle</small></label></div></fieldset>` : ''}
+      <fieldset class="field full"><legend>Échelle de temps</legend><div class="radio-cards">${zoomOpts}</div></fieldset>
       <div class="field full">
         <label class="check"><input type="checkbox" id="x-expand" checked> Afficher toutes les sous-tâches (même repliées)</label>
         ${store.project.baseline ? '<label class="check"><input type="checkbox" id="x-baseline" checked> Afficher le prévu (référence)</label>' : ''}
@@ -389,17 +394,17 @@ export function openHelpDialog({ version, sourceUrl, contact, legalUrl }) {
           <li>Cliquer sur un lien : le supprimer. Double-clic : modifier la tâche.</li>
         </ul>
         <h3 style="margin-top:14px">Raccourcis clavier</h3>
-        <div class="shortcuts">
-          <kbd>Inser</kbd><span>Ajouter une tâche après la sélection</span>
-          <kbd>Entrée</kbd><span>Modifier la tâche sélectionnée</span>
-          <kbd>Suppr</kbd><span>Supprimer la tâche sélectionnée</span>
-          <kbd>↑ ↓</kbd><span>Changer de tâche</span>
-          <kbd>Alt + → / ←</kbd><span>Sous-tâche / remonter d’un niveau</span>
-          <kbd>Alt + ↑ / ↓</kbd><span>Déplacer la tâche</span>
-          <kbd>Ctrl + Z / Y</kbd><span>Annuler / rétablir</span>
-          <kbd>Ctrl + S</kbd><span>Enregistrer le fichier .json</span>
-          <kbd>Ctrl + O</kbd><span>Ouvrir un fichier</span>
-        </div>
+        <dl class="shortcuts">
+          <dt><kbd>Inser</kbd></dt><dd>Ajouter une tâche après la sélection</dd>
+          <dt><kbd>Entrée</kbd></dt><dd>Modifier la tâche sélectionnée</dd>
+          <dt><kbd>Suppr</kbd></dt><dd>Supprimer la tâche sélectionnée</dd>
+          <dt><kbd>↑ ↓</kbd></dt><dd>Changer de tâche</dd>
+          <dt><kbd>Alt + → / ←</kbd></dt><dd>Sous-tâche / remonter d’un niveau</dd>
+          <dt><kbd>Alt + ↑ / ↓</kbd></dt><dd>Déplacer la tâche</dd>
+          <dt><kbd>Ctrl + Z / Y</kbd></dt><dd>Annuler / rétablir</dd>
+          <dt><kbd>Ctrl + S</kbd></dt><dd>Enregistrer le fichier .json</dd>
+          <dt><kbd>Ctrl + O</kbd></dt><dd>Ouvrir un fichier</dd>
+        </dl>
         <h3 style="margin-top:14px">Vos données</h3>
         <h3 style="margin-top:14px">GanttProject et agendas</h3>
         <p><b>Fichier → Importer depuis GanttProject</b> reprend un projet .gan existant. <b>Exporter → Agenda iCal</b> ajoute les tâches à Google Agenda, Outlook ou Apple Calendrier, une fois ou par abonnement (mise à jour automatique).</p>
@@ -434,7 +439,7 @@ export function openGanImportDialog({ fileName, text, models, onImport }) {
       <div class="field full"><label for="g-cal">Calendrier du projet importé</label>
         <select id="g-cal"><option value="">Temps plein (lundi → vendredi), comme GanttProject</option>${opts}<option value="current">Calendrier du projet actuel</option></select>
         <span class="hint">GanttProject compte les jours ouvrés. Avec un calendrier d’alternance, les durées deviennent des jours de présence et les dates s’allongent.</span></div>
-      <div class="field full"><span class="label">Lieu des tâches importées</span><div class="radio-cards">${whereCards}</div></div>
+      <fieldset class="field full"><legend>Lieu des tâches importées</legend><div class="radio-cards">${whereCards}</div></fieldset>
       <div class="field full"><label class="check"><input type="checkbox" id="g-keep" checked> Conserver les dates de début de GanttProject</label>
         <span class="hint">Chaque tâche reçoit une contrainte « ne pas commencer avant » sa date d’origine. Décochez pour laisser K-Gantt tout replanifier au plus tôt.</span></div>
     </div>`,
@@ -473,21 +478,21 @@ export function openIcalDialog({ onDownload }) {
     title: 'Agenda iCal',
     wide: true,
     body: `<div class="form-grid">
-      <div class="field full"><span class="label">Contenu de l’agenda</span>
+      <fieldset class="field full"><legend>Contenu de l’agenda</legend>
         <div class="radio-cards two">
           <label><input type="radio" name="i-mode" value="runs" checked><span>Un évènement par période travaillée</span><small>idéal en alternance : seuls les jours où la tâche avance</small></label>
           <label><input type="radio" name="i-mode" value="span"><span>Un évènement par tâche</span><small>du début à la fin, sans interruption</small></label>
         </div>
         <label class="check" style="margin-top:6px"><input type="checkbox" id="i-groups"> Inclure les groupes de tâches</label>
-      </div>
+      </fieldset>
 
-      <div class="section-title">1. Fichier à importer (une fois)</div>
+      <h3 class="section-title">1. Fichier à importer (une fois)</h3>
       <div class="full inline">
         <span class="muted" style="flex:1">Téléchargez un fichier <b>.ics</b> et importez-le dans Google Agenda, Outlook ou Apple Calendrier. Pour le mettre à jour, importez à nouveau le fichier : les évènements gardent le même identifiant.</span>
         <button class="btn btn-primary" type="button" id="i-download">${icon('download')} Télécharger le .ics</button>
       </div>
 
-      <div class="section-title">2. Synchronisation automatique (abonnement)</div>
+      <h3 class="section-title">2. Synchronisation automatique (abonnement)</h3>
       <ol class="full" style="margin:0;padding-left:20px;font-size:13px;display:grid;gap:4px">
         <li><b>Enregistrez</b> votre projet (Fichier → Enregistrer) puis déposez le fichier <b>.kgantt.json</b> sur un espace en ligne avec un <b>lien de partage public</b> : Nextcloud de l’établissement, Dropbox, Google Drive, GitHub…</li>
         <li>Collez ce lien ci-dessous et copiez l’<b>adresse d’abonnement</b>.</li>

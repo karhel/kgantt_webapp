@@ -7,6 +7,7 @@ import {
   MONTHS, MONTHS_SHORT, WEEKDAYS_SHORT, parseSlot, formatFR,
 } from './dates.js';
 import { PALETTE } from './project.js';
+import { STATUS_LABELS } from './scheduler.js';
 
 export const ZOOMS = {
   day: { label: 'Jour', dayW: 34 },
@@ -29,26 +30,29 @@ export const SVG_CSS = `
 .g-head-line{stroke:var(--g-line);stroke-width:1}
 .g-head-text{fill:var(--g-text);font-size:11px}
 .g-head-strong{fill:var(--g-text-strong);font-size:12px;font-weight:600}
-.g-head-muted{fill:var(--g-muted);font-size:9px}
+.g-head-muted{fill:var(--g-muted);font-size:11px}
 .g-head-today{fill:var(--g-today)}
-.g-head-today-text{fill:#fff;font-size:11px;font-weight:700}
+.g-head-today-text{fill:var(--g-school);font-size:11px;font-weight:700}
 .bg-school{fill:var(--g-school)}
 .bg-company{fill:var(--g-company)}
 .bg-off{fill:var(--g-off)}
+.hatch-line{stroke:var(--g-company-hatch);stroke-width:2}
 .g-grid{stroke:var(--g-line);stroke-width:1}
 .g-grid-soft{stroke:var(--g-line-soft);stroke-width:1}
 .g-row-sel{fill:var(--g-select)}
 .g-today{stroke:var(--g-today);stroke-width:2;stroke-dasharray:4 3}
-.bar-span{opacity:.28}
-.bar-run{opacity:.55}
-.bar-progress{opacity:1}
+.bar-hit{fill:transparent}
+.bar-gap{stroke:currentColor;stroke-width:2;stroke-dasharray:2 3}
+.bar-run{fill:currentColor;fill-opacity:.25;stroke:var(--g-bar-outline);stroke-width:1.25}
+.bar-progress{fill:currentColor}
+.bar-ms{stroke:var(--g-bar-outline);stroke-width:2}
 .bar-summary{fill:var(--g-summary)}
 .bar-summary-progress{fill:var(--g-summary-progress)}
 .bar-baseline{fill:var(--g-baseline)}
 .bar-label{fill:var(--g-text);font-size:12px}
-.bar-label-muted{fill:var(--g-muted);font-size:11px}
-.bar-late{stroke:var(--g-late);stroke-width:2;fill:none}
-.bar-error{fill:var(--g-late)}
+.bar-label-muted{fill:var(--g-muted);font-size:11.5px}
+.bar-label-late{fill:var(--g-late);font-size:11.5px;font-weight:700}
+.bar-late{stroke:var(--g-late);stroke-width:2;stroke-dasharray:5 3;fill:none}
 .dep{stroke:var(--g-dep);stroke-width:1.4;fill:none}
 .dep-arrow{fill:var(--g-dep)}
 .g-cell-text{fill:var(--g-text);font-size:12px}
@@ -60,10 +64,14 @@ export const SVG_CSS = `
 
 /** Valeurs claires des variables, utilisées pour les exports (indépendants du thème). */
 export const SVG_LIGHT_VARS = `
---g-head:#f8fafc;--g-line:#e2e8f0;--g-line-soft:#eef2f7;--g-text:#334155;--g-text-strong:#0f172a;
---g-muted:#64748b;--g-today:#e11d48;--g-school:#ffffff;--g-company:#fef3c7;--g-off:#f1f5f9;
---g-select:rgba(79,70,229,.08);--g-summary:#1e293b;--g-summary-progress:#4f46e5;--g-baseline:#94a3b8;
---g-late:#e11d48;--g-dep:#64748b;`;
+--g-head:#faf9f7;--g-line:#e2dfda;--g-line-soft:#efece8;--g-text:#292524;--g-text-strong:#1c1917;
+--g-muted:#5c554e;--g-today:#b91c1c;--g-school:#ffffff;--g-company:#e8eef5;--g-company-hatch:#9fb4ca;--g-off:#e9e7e3;
+--g-select:rgba(194,65,12,.08);--g-summary:#292524;--g-summary-progress:#c2410c;--g-baseline:#8f877e;
+--g-late:#b91c1c;--g-dep:#5c554e;--g-milestone-empty:#ffffff;--g-bar-outline:currentColor;`;
+
+/** Motif hachuré des jours « Entreprise » (l'information ne repose pas sur la seule couleur). */
+const HATCH_DEFS = '<defs><pattern id="kg-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+  + '<rect class="bg-company" width="6" height="6"/><line class="hatch-line" x1="1" y1="0" x2="1" y2="6"/></pattern></defs>';
 
 /** Calcule la géométrie de la frise. rows = [{ task, depth, wbs }] (lignes visibles). */
 export function computeLayout(project, sched, rows, zoom = project.view?.zoom || 'day', { today = todayDay() } = {}) {
@@ -130,7 +138,7 @@ export function headerSVG(L, resolver) {
       const isToday = day === L.today;
       if (isToday) out.push(`<rect class="g-head-today" x="${r1(x0 + 2)}" y="${H1 + 3}" width="${r1(L.dayW - 4)}" height="${L.headH - H1 - 6}" rx="6"/>`);
       const title = info.label ? `<title>${esc(info.label)}</title>` : '';
-      out.push(`<g>${title}<text class="${isToday ? 'g-head-today-text' : 'g-head-muted'}" x="${r1(x0 + L.dayW / 2)}" y="${H1 + 12}" text-anchor="middle" style="font-size:9px">${WEEKDAYS_SHORT[weekday(day)]}</text>`);
+      out.push(`<g>${title}<text class="${isToday ? 'g-head-today-text' : 'g-head-muted'}" x="${r1(x0 + L.dayW / 2)}" y="${H1 + 12}" text-anchor="middle">${WEEKDAYS_SHORT[weekday(day)]}</text>`);
       out.push(`<text class="${isToday ? 'g-head-today-text' : 'g-head-text'}" x="${r1(x0 + L.dayW / 2)}" y="${H1 + 25}" text-anchor="middle">${parts(day).d}</text></g>`);
       if (weekday(day) === 0) out.push(`<line class="g-head-line" x1="${r1(x0)}" y1="${H1}" x2="${r1(x0)}" y2="${L.headH}"/>`);
     }
@@ -167,7 +175,8 @@ function backgroundSVG(L, resolver, height) {
   const flush = (endSlot) => {
     if (runType && runType !== 'school') {
       const x0 = L.x(runStart), x1 = L.x(endSlot);
-      out.push(`<rect class="bg-${runType}" x="${r1(x0)}" y="0" width="${r1(x1 - x0)}" height="${height}"/>`);
+      const fill = runType === 'company' ? ' fill="url(#kg-hatch)"' : '';
+      out.push(`<rect class="bg-${runType}"${fill} x="${r1(x0)}" y="0" width="${r1(x1 - x0)}" height="${height}"/>`);
     }
   };
   const first = L.startDay * 2, last = (L.endDay + 1) * 2;
@@ -217,6 +226,7 @@ export function bodySVG(project, sched, L, opts = {}) {
   const resName = new Map(project.resources.map((r) => [r.id, r]));
   const out = [];
 
+  out.push(HATCH_DEFS);
   out.push(backgroundSVG(L, resolver, height));
 
   // Lignes (+ rectangle de sélection, déplacé par l'application sans tout redessiner)
@@ -286,30 +296,32 @@ export function bodySVG(project, sched, L, opts = {}) {
       labelX = x1 + 8;
     } else if (it.milestone) {
       const cx = milestoneX(L, it);
-      const fill = it.progress >= 100 ? color : 'var(--g-milestone-empty, #fff)';
-      g.push(`<path d="M${r1(cx)} ${yMid - 8}l8 8l-8 8l-8 -8z" fill="${fill}" stroke="${color}" stroke-width="2" data-role="bar"/>`);
+      // Jalon atteint : losange plein ; à venir : losange vide (différence de forme, pas seulement de couleur).
+      const fill = it.progress >= 100 ? 'currentColor' : 'var(--g-milestone-empty)';
+      g.push(`<path class="bar-ms" d="M${r1(cx)} ${yMid - 8}l8 8l-8 8l-8 -8z" fill="${fill}" data-role="bar"/>`);
       if (it.status === 'late') g.push(`<path class="bar-late" d="M${r1(cx)} ${yMid - 11}l11 11l-11 11l-11 -11z"/>`);
       labelX = cx + 14;
       if (interactive) g.push(linkHandle(cx + 11, yMid));
     } else {
       const x0 = L.x(it.start), x1 = L.x(it.end + 1);
       const y = yMid - 9, h = 18;
-      g.push(`<rect class="bar-span" x="${r1(x0)}" y="${y + 4}" width="${r1(x1 - x0)}" height="${h - 8}" rx="3" fill="${color}" data-role="bar"/>`);
-      // Créneaux réellement travaillés + avancement
+      // Zone de saisie pour la souris, puis interruptions en pointillés entre les périodes travaillées.
+      g.push(`<rect class="bar-hit" x="${r1(x0)}" y="${y}" width="${r1(x1 - x0)}" height="${h}" data-role="bar"/>`);
+      for (let i = 1; i < it.runs.length; i++) {
+        g.push(`<line class="bar-gap" x1="${r1(L.x(it.runs[i - 1][1] + 1))}" y1="${yMid}" x2="${r1(L.x(it.runs[i][0]))}" y2="${yMid}"/>`);
+      }
+      // Périodes travaillées (claires) et partie réalisée (pleine)
       let left = Math.round((it.n * it.progress) / 100);
       for (const [a, b] of it.runs) {
         const rx0 = L.x(a), rx1 = L.x(b + 1);
-        g.push(`<rect class="bar-run" x="${r1(rx0)}" y="${y}" width="${r1(rx1 - rx0)}" height="${h}" rx="3" fill="${color}" data-role="bar"/>`);
+        g.push(`<rect class="bar-run" x="${r1(rx0)}" y="${y}" width="${r1(rx1 - rx0)}" height="${h}" rx="2" data-role="bar"/>`);
         if (left > 0) {
           const k = Math.min(left, b - a + 1);
-          g.push(`<rect class="bar-progress" x="${r1(rx0)}" y="${y}" width="${r1(L.x(a + k) - rx0)}" height="${h}" rx="3" fill="${color}" data-role="bar"/>`);
+          g.push(`<rect class="bar-progress" x="${r1(rx0)}" y="${y}" width="${r1(L.x(a + k) - rx0)}" height="${h}" rx="2" data-role="bar"/>`);
           left -= k;
         }
       }
-      if (it.status === 'late') g.push(`<rect class="bar-late" x="${r1(x0 - 2)}" y="${y - 2}" width="${r1(x1 - x0 + 4)}" height="${h + 4}" rx="5"/>`);
-      if (L.zoom !== 'month' && x1 - x0 > 34 && it.progress > 0) {
-        g.push(`<text x="${r1(x0 + 5)}" y="${yMid + 4}" style="font-size:10px;font-weight:700;fill:#fff;pointer-events:none">${it.progress}%</text>`);
-      }
+      if (it.status === 'late') g.push(`<rect class="bar-late" x="${r1(x0 - 3)}" y="${y - 3}" width="${r1(x1 - x0 + 6)}" height="${h + 6}" rx="4"/>`);
       labelX = x1 + 8;
       if (interactive) {
         g.push(`<rect x="${r1(x1 - 6)}" y="${y}" width="10" height="${h}" fill="transparent" data-role="resize" style="cursor:ew-resize"><title>Glisser pour changer la durée</title></rect>`);
@@ -321,11 +333,14 @@ export function bodySVG(project, sched, L, opts = {}) {
     const names = t.resources.map((r) => resName.get(r)?.name).filter(Boolean).join(', ');
     let label = `<tspan class="bar-label">${esc(t.name)}</tspan>`;
     if (names) label += `<tspan class="bar-label-muted" dx="6">${esc(names)}</tspan>`;
-    if (it.error) label += `<tspan class="bar-label-muted" dx="6" style="fill:var(--g-late)">⚠ ${esc(it.error)}</tspan>`;
+    if (it.status === 'late' && !it.summary && !it.error) label += `<tspan class="bar-label-late" dx="6">en retard</tspan>`;
+    if (it.error) label += `<tspan class="bar-label-late" dx="6">${esc(it.error)}</tspan>`;
     g.push(`<text x="${r1(labelX)}" y="${yMid + 4}" style="pointer-events:none">${label}</text>`);
 
     const cls = `g-task${it.summary ? ' is-summary' : ''}${it.milestone ? ' is-milestone' : ''}`;
-    out.push(`<g class="${cls}" data-id="${esc(t.id)}" style="${interactive && !it.summary ? 'cursor:grab' : ''}">${g.join('')}</g>`);
+    const when = it.milestone ? formatFR(dayOfSlot(it.start)) : `${formatFR(dayOfSlot(it.start))} → ${formatFR(dayOfSlot(it.end))}`;
+    const tip = `${t.name} — ${when} — ${it.progress} % (${STATUS_LABELS[it.status]})`;
+    out.push(`<g class="${cls}" data-id="${esc(t.id)}" style="color:${esc(color)};${interactive && !it.summary ? 'cursor:grab' : ''}"><title>${esc(tip)}</title>${g.join('')}</g>`);
   }
   return { svg: out.join(''), height };
 }

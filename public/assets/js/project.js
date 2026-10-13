@@ -7,7 +7,9 @@ import { toDay, toISO, today, mondayOf } from './dates.js';
 export const FILE_FORMAT = 'kgantt';
 export const FILE_VERSION = 1;
 
-export const PALETTE = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626', '#db2777', '#7c3aed', '#475569'];
+// Couleurs des barres : toutes ≥ 3:1 sur fond clair (contour clair ajouté en thème sombre).
+export const PALETTE = ['#c2410c', '#1d4ed8', '#0f766e', '#15803d', '#7e22ce', '#be185d', '#854d0e', '#475569'];
+export const PALETTE_NAMES = ['Orange', 'Bleu', 'Sarcelle', 'Vert', 'Violet', 'Framboise', 'Brun', 'Ardoise'];
 
 export function uid(prefix = 't') {
   return prefix + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);

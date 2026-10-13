@@ -2,6 +2,14 @@
 
 Ce fichier suit le format [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Modifié
+- Nouvelle identité visuelle sobre autour de l'orange ; suppression des dégradés, halos, flous et effets décoratifs.
+- Accessibilité WCAG 2.1 AA : contrastes vérifiés, navigation complète au clavier, étiquettes et états exposés aux lecteurs d'écran, information jamais portée par la seule couleur (voir `docs/ACCESSIBILITE.md`).
+- Messages d'erreur explicites pour les saisies invalides.
+- Le tableau ne masque plus le diagramme dans une fenêtre étroite.
+
 ## [1.0.0] — 2026-10-13
 
 Première version publique.

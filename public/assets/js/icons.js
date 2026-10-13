@@ -32,6 +32,7 @@ const P = {
   help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5h.01',
   sparkles: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z',
   chevronRight: 'M9 6l6 6-6 6',
+  chevronLeft: 'M15 6l-6 6 6 6',
   chevronDown: 'M6 9l6 6 6-6',
   link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
   info: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 11v6M12 7.5h.01',
@@ -43,7 +44,21 @@ const P = {
 export function icon(name, size = 18) {
   const d = P[name];
   if (!d) return '';
-  return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+}
+
+/**
+ * Icône d'état d'une tâche : forme différente pour chaque état, pour ne pas dépendre de la couleur
+ * (terminée : coche pleine ; en cours : demi-disque ; en retard : triangle « ! » ; à faire : cercle vide).
+ */
+export function statusIcon(status) {
+  const shapes = {
+    done: '<circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.5 8.2l2.3 2.3 4.7-4.9" fill="none" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    progress: '<circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/>',
+    late: '<path d="M8 1.2l7 13H1z" fill="currentColor"/><path d="M8 5.6v4.2M8 11.9v.1" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round"/>',
+    todo: '<circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  };
+  return `<svg class="st st-${status}" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${shapes[status] || shapes.todo}</svg>`;
 }
 
 /** Ajoute l'icône indiquée par data-icon devant le contenu de chaque élément. */

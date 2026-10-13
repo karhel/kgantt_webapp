@@ -60,8 +60,8 @@ p.calendar = {
   ],
 };
 p.resources = [
-  { id: 'lea', name: 'Léa', color: '#4f46e5' },
-  { id: 'tom', name: 'Tom', color: '#059669' },
+  { id: 'lea', name: 'Léa', color: '#c2410c' },
+  { id: 'tom', name: 'Tom', color: '#0f766e' },
   { id: 'ines', name: 'Inès', color: '#db2777' },
 ];
 const T = (id, f) => newTask({ id, ...f });
@@ -71,16 +71,16 @@ p.tasks = [
   T('t12', { parent: 'g1', name: 'Rédaction du cahier des charges', duration: 2, where: 'any', deps: ['t11'], progress: 100, resources: ['lea'] }),
   T('m13', { parent: 'g1', name: 'Validation du cahier des charges', type: 'milestone', duration: 0, deps: ['t12'], progress: 100 }),
   T('g2', { name: 'Conception', duration: 0 }),
-  T('t21', { parent: 'g2', name: 'Modélisation de la base de données', duration: 3, deps: ['m13'], progress: 60, resources: ['tom'], color: '#0891b2' }),
-  T('t22', { parent: 'g2', name: 'Maquettes de l’interface', duration: 2, where: 'any', deps: ['m13'], progress: 30, resources: ['ines'], color: '#0891b2' }),
+  T('t21', { parent: 'g2', name: 'Modélisation de la base de données', duration: 3, deps: ['m13'], progress: 60, resources: ['tom'], color: '#1d4ed8' }),
+  T('t22', { parent: 'g2', name: 'Maquettes de l’interface', duration: 2, where: 'any', deps: ['m13'], progress: 30, resources: ['ines'], color: '#1d4ed8' }),
   T('g3', { name: 'Réalisation', duration: 0 }),
-  T('t31', { parent: 'g3', name: 'Développement du back-end', duration: 6, deps: ['t21'], resources: ['tom', 'lea'], color: '#059669' }),
-  T('t32', { parent: 'g3', name: 'Développement du front-end', duration: 5, deps: ['t22'], resources: ['ines'], color: '#059669' }),
-  T('t33', { parent: 'g3', name: 'Tests chez le tuteur en entreprise', duration: 2, where: 'company', deps: ['t31', 't32'], resources: ['lea'], color: '#d97706' }),
+  T('t31', { parent: 'g3', name: 'Développement du back-end', duration: 6, deps: ['t21'], resources: ['tom', 'lea'], color: '#0f766e' }),
+  T('t32', { parent: 'g3', name: 'Développement du front-end', duration: 5, deps: ['t22'], resources: ['ines'], color: '#0f766e' }),
+  T('t33', { parent: 'g3', name: 'Tests chez le tuteur en entreprise', duration: 2, where: 'company', deps: ['t31', 't32'], resources: ['lea'], color: '#854d0e' }),
   T('g4', { name: 'Livraison', duration: 0 }),
   T('t41', { parent: 'g4', name: 'Documentation utilisateur', duration: 2, where: 'any', deps: ['t33'], resources: ['ines'] }),
   T('t42', { parent: 'g4', name: 'Préparation de la soutenance', duration: 1.5, deps: ['t33'], resources: ['lea', 'tom', 'ines'] }),
-  T('m43', { parent: 'g4', name: 'Soutenance', type: 'milestone', duration: 0, deps: ['t41', 't42'], color: '#dc2626' }),
+  T('m43', { parent: 'g4', name: 'Soutenance', type: 'milestone', duration: 0, deps: ['t41', 't42'], color: '#7e22ce' }),
 ];
 // Le « prévu » : la planification initiale, où la modélisation était estimée à 2 jours.
 const initial = structuredClone(p);

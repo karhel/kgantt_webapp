@@ -32,17 +32,22 @@ header('Content-Type: text/html; charset=utf-8');
   </script>
 </head>
 <body class="page">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
   <header class="topbar">
-    <a class="brand" href="./" title="Retour à K-Gantt">
-      <span class="brand-mark" aria-hidden="true">K</span>
-      <span class="brand-name">K-<b>Gantt</b></span>
+    <a class="brand" href="./">
+      <svg class="brand-mark" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+        <rect x="1" y="3" width="11" height="4" rx="1" fill="currentColor"/>
+        <rect x="6" y="9" width="14" height="4" rx="1" fill="currentColor"/>
+        <rect x="3" y="15" width="8" height="4" rx="1" fill="currentColor"/>
+      </svg>
+      <span class="brand-name">K-Gantt</span>
     </a>
     <div class="topbar-actions">
       <a class="btn" href="./">← Retour à l’application</a>
     </div>
   </header>
 
-  <main class="legal">
+  <main class="legal" id="contenu" tabindex="-1">
     <h1>Mentions légales</h1>
     <p class="lead">Conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique (LCEN).</p>
 
