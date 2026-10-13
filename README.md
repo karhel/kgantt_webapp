@@ -1,2 +1,150 @@
-# kgantt_webapp
-Application de gestion de projet 
+# K-Gantt
+
+**Diagrammes de Gantt simples et intuitifs pour les projets étudiants, pensés pour l'alternance.**
+
+K-Gantt est une application web (PHP / HTML / JavaScript) qui permet aux étudiants de planifier leurs projets de classe en tenant compte de leur **rythme réel** : jours à l'école, jours en entreprise, vacances, stages. Les durées sont saisies en **jours de présence** et les dates sont calculées automatiquement.
+
+Adresse de production : **https://kgantt.phoen-ix.net**
+
+---
+
+## Fonctionnalités
+
+### Planification
+- Tâches, **sous-tâches** (groupes), **jalons** (rendus, soutenances…)
+- **Durées en jours de présence**, avec les demi-journées en option
+- **Lieu de la tâche**, qui détermine les jours comptés : *École* (jours de cours), *Entreprise* ou *Partout*
+- **Dépendances** « fin → début » : une tâche attend la fin d'une autre, et les dates se recalculent seules
+- Contrainte « ne pas commencer avant » une date
+- **Ressources** : membres de l'équipe, avec une couleur par personne
+- Saisie rapide au clavier dans le tableau, avec annuler / rétablir (100 niveaux)
+- Dans le diagramme, à la souris :
+  - glisser une barre pour la déplacer ;
+  - glisser son bord droit pour changer la durée ;
+  - glisser son rond ○ vers une autre tâche pour créer un lien ;
+  - cliquer sur un lien pour le supprimer.
+- Échelles **Jour / Semaine / Mois** et ligne « aujourd'hui »
+
+### Calendrier d'alternance
+- **Semaines types** « École » et « Entreprise », réglables à la demi-journée
+- Rythme **fixe** (ex. lundi-mardi à l'école, le reste en entreprise) ou **alternance de semaines** (ex. 1 semaine école / 2 semaines entreprise)
+- **Ajustements semaine par semaine** au pinceau, pour reproduire le calendrier d'alternance de l'établissement
+- **Périodes** : vacances, stages, semaines de regroupement
+- **Jours fériés** français calculés automatiquement
+- Aperçu sur 12 mois et décompte des jours d'école et d'entreprise
+- **Modèles partageables** : un enseignant exporte le calendrier de sa classe (`.kgantt-calendar.json`), les étudiants l'importent. Les modèles déposés dans `public/modeles/calendriers/` apparaissent dans la liste.
+
+Dans le diagramme, les barres montrent les jours réellement travaillés : une tâche « École » de 3 jours s'étale sur plusieurs semaines, et seuls les jours de cours sont pleins.
+
+### Suivi de l'avancement
+- % réalisé par tâche ; le % des groupes et du projet est calculé et pondéré par les durées
+- **Journal d'avancement daté**, avec une note facultative (journal de bord)
+- **État** de chaque tâche (à faire, en cours, terminée, en retard), en comparant le réalisé à l'attendu à la date du jour
+- **Prévu / réel** : on fige une planification de référence, qui s'affiche en gris sous les barres
+
+### Fichiers et exports
+- **Pas de compte, pas de base de données, aucune donnée stockée sur le serveur**
+- Le projet est enregistré dans un fichier **`.kgantt.json`** : *Fichier → Enregistrer* (Ctrl+S) pour l'enregistrer, *Ouvrir* (Ctrl+O) ou glisser-déposer pour le rouvrir
+- Un **brouillon** est conservé dans le navigateur (localStorage), pour éviter les pertes en cas de fermeture accidentelle
+- Exports :
+  - **PDF** : A4 ou A3 paysage, sur une page ou sur plusieurs pages, avec un en-tête projet / équipe / classe ;
+  - **PNG** ;
+  - **CSV** compatible Excel en français (séparateur `;`, UTF-8 avec BOM) ;
+  - **JSON**.
+- Thème clair et **mode sombre**
+
+---
+
+## Installation sur o2switch
+
+L'application n'a besoin que de **PHP ≥ 7.4** (PHP 8.x recommandé), sans base de données ni dépendance à installer.
+
+1. Dans cPanel, créez le sous-domaine `kgantt.phoen-ix.net`. Notez son dossier racine, par exemple `~/kgantt.phoen-ix.net`.
+2. Activez le certificat **SSL Let's Encrypt** pour le sous-domaine (cPanel → *Let's Encrypt SSL*). Le `.htaccess` force ensuite le HTTPS.
+3. Envoyez le **contenu du dossier `public/`** dans ce dossier racine, par FTP / SFTP, par le gestionnaire de fichiers ou par Git avec *Git Version Control*.
+   ```
+   public/
+   ├── index.php              ← page de l'application
+   ├── .htaccess              ← HTTPS, en-têtes de sécurité, cache
+   ├── assets/                ← CSS, JavaScript, jsPDF, icônes
+   ├── modeles/calendriers/   ← modèles de calendrier proposés aux étudiants
+   └── exemples/              ← projet d'exemple
+   ```
+4. Ouvrez https://kgantt.phoen-ix.net.
+
+Pour **ajouter un modèle de calendrier** pour une classe :
+1. réglez le calendrier dans l'application ;
+2. cliquez sur *Partager ce modèle (.json)* ;
+3. déposez le fichier dans `public/modeles/calendriers/` sur le serveur.
+
+Il apparaît aussitôt dans la liste « Partir d'un modèle ».
+
+## Développement
+
+```bash
+# Serveur local
+php -S localhost:8080 -t public        # ou : npm run serve
+
+# Tests du moteur (calendrier, planification, CSV) — Node.js ≥ 18
+npm test
+
+# Régénérer les modèles de calendrier fournis et le projet d'exemple
+node tools/generer-modeles.mjs
+```
+
+### Organisation du code
+
+| Fichier | Rôle |
+|---|---|
+| `public/index.php` | Page unique ; liste les modèles de calendrier |
+| `assets/js/dates.js` | Dates, semaines ISO, demi-journées, jours fériés |
+| `assets/js/calendar.js` | Calendrier de rythme : type de chaque demi-journée (école / entreprise / libre) |
+| `assets/js/scheduler.js` | Moteur de planification : dates, groupes, avancement attendu, retards |
+| `assets/js/project.js` | Modèle de données, validation des fichiers, arborescence, détection des boucles |
+| `assets/js/store.js` | État, annuler / rétablir, brouillon local |
+| `assets/js/gantt.js` | Rendu SVG du diagramme (écran et exports) |
+| `assets/js/app.js` | Interface : tableau, interactions, clavier, menus |
+| `assets/js/dialogs.js`, `calendar-ui.js` | Fenêtres : tâche, projet, ressources, export, aide, calendrier |
+| `assets/js/export.js`, `csv.js` | Exports JSON, CSV, PNG, PDF |
+| `assets/vendor/jspdf.umd.min.js` | [jsPDF](https://github.com/parallax/jsPDF) 2.5.1 (MIT) |
+| `tests/` | Tests unitaires (`node --test`) |
+
+Pas de framework ni d'étape de compilation : les fichiers sont des modules ES servis tels quels.
+
+### Format de fichier `.kgantt.json` (version 1)
+
+```jsonc
+{
+  "format": "kgantt", "version": 1,
+  "project":  { "name": "…", "team": "…", "className": "…", "teacher": "…", "start": "2026-09-07", "halfDays": false },
+  "calendar": {
+    "format": "kgantt-calendar", "version": 1, "name": "…",
+    "weekTemplates": { "school": [["school","school"], …7 jours], "company": [ … ] }, // [matin, après-midi]
+    "defaultWeek": "school",                                    // rythme fixe
+    "cycle": { "anchor": "2026-08-31", "weeks": ["school","company"] }, // ou alternance (null sinon)
+    "weeks": { "2026-W44": "off" },                             // semaines forcées
+    "periods": [{ "start": "2026-10-17", "end": "2026-11-01", "type": "off", "label": "Toussaint" }],
+    "days": {}, "publicHolidays": true
+  },
+  "resources": [{ "id": "lea", "name": "Léa", "color": "#4f46e5" }],
+  "tasks": [{
+    "id": "t1", "name": "Analyse", "parent": null, "type": "task",   // ou "milestone"
+    "duration": 2, "where": "school",                                // "school" | "company" | "any"
+    "notBefore": null, "deps": [], "progress": 50, "resources": ["lea"],
+    "color": null, "notes": "", "collapsed": false,
+    "log": [{ "date": "2026-09-14", "progress": 50, "note": "…" }]
+  }],
+  "baseline": { "date": "2026-09-07", "tasks": { "t1": { "start": "2026-09-07", "end": "2026-09-08:pm" } } },
+  "view": { "zoom": "week", "showBaseline": true }
+}
+```
+
+Une demi-journée s'écrit `AAAA-MM-JJ` pour le matin et `AAAA-MM-JJ:pm` pour l'après-midi.
+
+## Feuille de route
+
+Voir [docs/PLAN.md](docs/PLAN.md).
+
+## Licence
+
+À définir par l'auteur. jsPDF est distribué sous licence MIT (`public/assets/vendor/jspdf.LICENSE.txt`).

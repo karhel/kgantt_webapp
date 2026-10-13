@@ -1,0 +1,74 @@
+{
+  "format": "kgantt-calendar",
+  "version": 1,
+  "name": "Temps plein école (lundi → vendredi)",
+  "description": "Tous les jours ouvrés à l’école. Pour les classes hors alternance.",
+  "weekTemplates": {
+    "school": [
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ],
+    "company": [
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ]
+  },
+  "defaultWeek": "school",
+  "cycle": null,
+  "weeks": {},
+  "periods": [],
+  "days": {},
+  "publicHolidays": true
+}

@@ -1,0 +1,74 @@
+{
+  "format": "kgantt-calendar",
+  "version": 1,
+  "name": "Alternance : 3 jours école / 2 jours entreprise",
+  "description": "Du lundi au mercredi à l’école, jeudi et vendredi en entreprise.",
+  "weekTemplates": {
+    "school": [
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ],
+    "company": [
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ]
+  },
+  "defaultWeek": "school",
+  "cycle": null,
+  "weeks": {},
+  "periods": [],
+  "days": {},
+  "publicHolidays": true
+}

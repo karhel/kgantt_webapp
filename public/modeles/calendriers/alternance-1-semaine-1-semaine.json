@@ -1,0 +1,80 @@
+{
+  "format": "kgantt-calendar",
+  "version": 1,
+  "name": "Alternance : 1 semaine école / 1 semaine entreprise",
+  "description": "Une semaine sur deux à l’école. Ajustez la date de départ du cycle et les semaines particulières.",
+  "weekTemplates": {
+    "school": [
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ],
+    "company": [
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ]
+  },
+  "defaultWeek": "school",
+  "cycle": {
+    "anchor": "2026-08-31",
+    "weeks": [
+      "school",
+      "company"
+    ]
+  },
+  "weeks": {},
+  "periods": [],
+  "days": {},
+  "publicHolidays": true
+}

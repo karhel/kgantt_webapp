@@ -1,0 +1,82 @@
+{
+  "format": "kgantt-calendar",
+  "version": 1,
+  "name": "Alternance : 1 semaine école / 3 semaines entreprise",
+  "description": "Une semaine à l’école puis trois semaines en entreprise.",
+  "weekTemplates": {
+    "school": [
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "school",
+        "school"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ],
+    "company": [
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "company",
+        "company"
+      ],
+      [
+        "off",
+        "off"
+      ],
+      [
+        "off",
+        "off"
+      ]
+    ]
+  },
+  "defaultWeek": "school",
+  "cycle": {
+    "anchor": "2026-08-31",
+    "weeks": [
+      "school",
+      "company",
+      "company",
+      "company"
+    ]
+  },
+  "weeks": {},
+  "periods": [],
+  "days": {},
+  "publicHolidays": true
+}

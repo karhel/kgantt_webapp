@@ -1,0 +1,500 @@
+{
+  "format": "kgantt",
+  "version": 1,
+  "project": {
+    "name": "Application de gestion de bibliothèque",
+    "description": "Projet de 1re année : application web de prêt de livres pour le CDI.",
+    "team": "Groupe 2 — Léa, Tom, Inès",
+    "className": "BTS SIO 1",
+    "teacher": "M. Martin",
+    "start": "2026-09-07",
+    "halfDays": true
+  },
+  "calendar": {
+    "format": "kgantt-calendar",
+    "version": 1,
+    "name": "BTS SIO 1 — 2 j école / 3 j entreprise (exemple)",
+    "description": "Lundi et mardi à l’école, du mercredi au vendredi en entreprise, toutes les semaines.",
+    "weekTemplates": {
+      "school": [
+        [
+          "school",
+          "school"
+        ],
+        [
+          "school",
+          "school"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "off",
+          "off"
+        ],
+        [
+          "off",
+          "off"
+        ]
+      ],
+      "company": [
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "company",
+          "company"
+        ],
+        [
+          "off",
+          "off"
+        ],
+        [
+          "off",
+          "off"
+        ]
+      ]
+    },
+    "defaultWeek": "school",
+    "cycle": null,
+    "weeks": {},
+    "periods": [
+      {
+        "start": "2026-10-17",
+        "end": "2026-11-01",
+        "type": "off",
+        "label": "Vacances de la Toussaint (exemple)"
+      },
+      {
+        "start": "2026-12-19",
+        "end": "2027-01-03",
+        "type": "off",
+        "label": "Vacances de Noël (exemple)"
+      },
+      {
+        "start": "2026-11-23",
+        "end": "2026-11-27",
+        "type": "school",
+        "label": "Semaine de regroupement à l’école"
+      }
+    ],
+    "days": {},
+    "publicHolidays": true
+  },
+  "resources": [
+    {
+      "id": "lea",
+      "name": "Léa",
+      "color": "#4f46e5"
+    },
+    {
+      "id": "tom",
+      "name": "Tom",
+      "color": "#059669"
+    },
+    {
+      "id": "ines",
+      "name": "Inès",
+      "color": "#db2777"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "g1",
+      "name": "Cadrage",
+      "parent": null,
+      "type": "task",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [],
+      "progress": 0,
+      "resources": [],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t11",
+      "name": "Analyse du besoin avec la documentaliste",
+      "parent": "g1",
+      "type": "task",
+      "duration": 2,
+      "where": "school",
+      "notBefore": null,
+      "deps": [],
+      "progress": 100,
+      "resources": [
+        "lea",
+        "tom",
+        "ines"
+      ],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": [
+        {
+          "date": "2026-09-14",
+          "progress": 100,
+          "note": "Entretien réalisé"
+        }
+      ]
+    },
+    {
+      "id": "t12",
+      "name": "Rédaction du cahier des charges",
+      "parent": "g1",
+      "type": "task",
+      "duration": 2,
+      "where": "any",
+      "notBefore": null,
+      "deps": [
+        "t11"
+      ],
+      "progress": 100,
+      "resources": [
+        "lea"
+      ],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "m13",
+      "name": "Validation du cahier des charges",
+      "parent": "g1",
+      "type": "milestone",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "t12"
+      ],
+      "progress": 100,
+      "resources": [],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "g2",
+      "name": "Conception",
+      "parent": null,
+      "type": "task",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [],
+      "progress": 0,
+      "resources": [],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t21",
+      "name": "Modélisation de la base de données",
+      "parent": "g2",
+      "type": "task",
+      "duration": 3,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "m13"
+      ],
+      "progress": 60,
+      "resources": [
+        "tom"
+      ],
+      "color": "#0891b2",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t22",
+      "name": "Maquettes de l’interface",
+      "parent": "g2",
+      "type": "task",
+      "duration": 2,
+      "where": "any",
+      "notBefore": null,
+      "deps": [
+        "m13"
+      ],
+      "progress": 30,
+      "resources": [
+        "ines"
+      ],
+      "color": "#0891b2",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "g3",
+      "name": "Réalisation",
+      "parent": null,
+      "type": "task",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [],
+      "progress": 0,
+      "resources": [],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t31",
+      "name": "Développement du back-end",
+      "parent": "g3",
+      "type": "task",
+      "duration": 6,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "t21"
+      ],
+      "progress": 0,
+      "resources": [
+        "tom",
+        "lea"
+      ],
+      "color": "#059669",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t32",
+      "name": "Développement du front-end",
+      "parent": "g3",
+      "type": "task",
+      "duration": 5,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "t22"
+      ],
+      "progress": 0,
+      "resources": [
+        "ines"
+      ],
+      "color": "#059669",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t33",
+      "name": "Tests chez le tuteur en entreprise",
+      "parent": "g3",
+      "type": "task",
+      "duration": 2,
+      "where": "company",
+      "notBefore": null,
+      "deps": [
+        "t31",
+        "t32"
+      ],
+      "progress": 0,
+      "resources": [
+        "lea"
+      ],
+      "color": "#d97706",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "g4",
+      "name": "Livraison",
+      "parent": null,
+      "type": "task",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [],
+      "progress": 0,
+      "resources": [],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t41",
+      "name": "Documentation utilisateur",
+      "parent": "g4",
+      "type": "task",
+      "duration": 2,
+      "where": "any",
+      "notBefore": null,
+      "deps": [
+        "t33"
+      ],
+      "progress": 0,
+      "resources": [
+        "ines"
+      ],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "t42",
+      "name": "Préparation de la soutenance",
+      "parent": "g4",
+      "type": "task",
+      "duration": 1.5,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "t33"
+      ],
+      "progress": 0,
+      "resources": [
+        "lea",
+        "tom",
+        "ines"
+      ],
+      "color": null,
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    },
+    {
+      "id": "m43",
+      "name": "Soutenance",
+      "parent": "g4",
+      "type": "milestone",
+      "duration": 0,
+      "where": "school",
+      "notBefore": null,
+      "deps": [
+        "t41",
+        "t42"
+      ],
+      "progress": 0,
+      "resources": [],
+      "color": "#dc2626",
+      "notes": "",
+      "collapsed": false,
+      "log": []
+    }
+  ],
+  "baseline": {
+    "date": "2026-09-07",
+    "tasks": {
+      "g1": {
+        "start": "2026-09-07",
+        "end": "2026-09-11",
+        "milestone": false
+      },
+      "t11": {
+        "start": "2026-09-07",
+        "end": "2026-09-08:pm",
+        "milestone": false
+      },
+      "t12": {
+        "start": "2026-09-09",
+        "end": "2026-09-10:pm",
+        "milestone": false
+      },
+      "m13": {
+        "start": "2026-09-11",
+        "end": "2026-09-11",
+        "milestone": true
+      },
+      "g2": {
+        "start": "2026-09-11",
+        "end": "2026-09-15:pm",
+        "milestone": false
+      },
+      "t21": {
+        "start": "2026-09-14",
+        "end": "2026-09-15:pm",
+        "milestone": false
+      },
+      "t22": {
+        "start": "2026-09-11",
+        "end": "2026-09-14:pm",
+        "milestone": false
+      },
+      "g3": {
+        "start": "2026-09-15",
+        "end": "2026-10-08:pm",
+        "milestone": false
+      },
+      "t31": {
+        "start": "2026-09-21",
+        "end": "2026-10-06:pm",
+        "milestone": false
+      },
+      "t32": {
+        "start": "2026-09-15",
+        "end": "2026-09-29:pm",
+        "milestone": false
+      },
+      "t33": {
+        "start": "2026-10-07",
+        "end": "2026-10-08:pm",
+        "milestone": false
+      },
+      "g4": {
+        "start": "2026-10-09",
+        "end": "2026-10-13:pm",
+        "milestone": false
+      },
+      "t41": {
+        "start": "2026-10-09",
+        "end": "2026-10-12:pm",
+        "milestone": false
+      },
+      "t42": {
+        "start": "2026-10-12",
+        "end": "2026-10-13",
+        "milestone": false
+      },
+      "m43": {
+        "start": "2026-10-13:pm",
+        "end": "2026-10-13:pm",
+        "milestone": true
+      }
+    }
+  },
+  "view": {
+    "zoom": "week",
+    "showBaseline": true
+  }
+}
